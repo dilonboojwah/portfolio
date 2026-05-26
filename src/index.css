@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── GLOBAL RESETS ───────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #F5F2EC;
+  color: #2A2720;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── DESIGN TOKENS (CSS vars for non-Tailwind use) */
+:root {
+  --bg:        #F5F2EC;
+  --text:      #2A2720;
+  --secondary: #6B6458;
+  --muted:     #8C8678;
+  --accent:    #B8A97A;
+  --border:    #D6D0C4;
+  --hover:     #EDE9DF;
+  --panel:     #F9F7F3;
+}
+
+/* ── EDITORIAL (Newsreader italic) ───────────── */
+.editorial {
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-weight: 300;
+}
+
+/* ── EYEBROW LABEL ───────────────────────────── */
+.eyebrow {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}

@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls \"C:\\\\Users\\\\dusti\\\\OneDrive\\\\Desktop\\\\code\\\\portfolio\\\\\" && node --version && npm --version)",
+      "Read(//mnt/c/Users/dusti/OneDrive/Desktop/code/**)",
+      "Bash(npm --version)",
+      "Bash(del \"C:\\\\Users\\\\dusti\\\\OneDrive\\\\Desktop\\\\code\\\\portfolio\\\\prototype.html\")",
+      "WebFetch(domain:aircenter.space)",
+      "WebFetch(domain:thinkingmachines.ai)",
+      "WebFetch(domain:www.floema.com)",
+      "WebFetch(domain:www.saradu.com)"
+    ]
+  }
+}
