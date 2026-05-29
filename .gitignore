@@ -6,3 +6,6 @@ dist/
 *.log
 npm-debug.log*
 .DS_Store
+
+# Local, machine-specific Claude Code config (not shared)
+.claude/settings.local.json
