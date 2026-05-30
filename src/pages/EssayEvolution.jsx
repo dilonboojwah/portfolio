@@ -1,28 +1,17 @@
-import { Link } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
 
 // ── ALL LOCAL ASSETS ──────────────────────────────────────────────────────────
-import papyrusTexture      from '../assets/image/homepage-papyrusfilter.webp'
-import cornerTR            from '../assets/illustration/essayborder-tr.svg'
-import cornerTL            from '../assets/illustration/essayborder-tl.svg'
-import cornerBL            from '../assets/illustration/essayborder-bl.svg'
-import cornerBR            from '../assets/illustration/essayborder-br.svg'
-import imgArtemis          from '../assets/illustration/essay-artemis.svg'
-import backButton          from '../assets/illustration/backbutton.svg'
+import imgArden          from '../assets/illustration/essay-arden.svg'
 import timelineNumLeft     from '../assets/illustration/timeline-numonleft.svg'
 import timelineOnRight     from '../assets/illustration/timeline-ontheright.svg'
 import brushH              from '../assets/illustration/brush-border-horizontal.svg'  // 960×3px
 import brushV              from '../assets/illustration/brush-border-vertical.svg'    // 3×360px
-
-// Fraunces variable font axes
-const fv = { fontVariationSettings: "'SOFT' 0, 'WONK' 1" }
-
-// ── FOOTER TAIL ─────────────────────────────────────────────────────────────
-// Space below the last paragraph = the gap ABOVE the © line (COPYRIGHT_DROP) +
-// the gap BELOW it (the column's paddingBottom). They always sum to FOOTER_TAIL,
-// so raising COPYRIGHT_DROP moves the copyright LOWER without changing the total
-// page height. ← To nudge the copyright, change COPYRIGHT_DROP only.
-const FOOTER_TAIL = 236
-const COPYRIGHT_DROP = 160   // was 96 (the old mt-24); +24 = 24px lower
+import { fv }              from '../lib/theme'
+import EssayLayout         from '../components/EssayLayout'
 
 // ── BRUSH BORDER HELPER ───────────────────────────────────────────────────────
 // right=true  → vertical brush tiled down the cell's right edge (repeat-y, 360px tall)
@@ -56,7 +45,7 @@ function bb(right, bottom, xOff = 0) {
 // Left entries  (1985, 2012, 2035): numonleft  SVG — circle left, arrow right, year left.
 // Right entries (1998, 2026):       ontheright SVG — circle right, arrow left, year right.
 function Timeline() {
-  const yr = { ...fv, fontSize: '17px', lineHeight: '1.5', letterSpacing: '0.17px', whiteSpace: 'nowrap' }
+  const yr = { ...fv, fontSize: '16px', lineHeight: '1.5', letterSpacing: '0.17px', whiteSpace: 'nowrap' }
   const ds = { ...fv, fontSize: '14px', lineHeight: '1.5', letterSpacing: '0.14px' }
 
   // Each row's base y-coordinate (80px apart gives clean even spacing)
@@ -161,7 +150,7 @@ function EvolutionTable() {
         <tr>
           <th style={{ ...hdr, ...bb(true,  true,  X.h),  width: '88px'  }} />
           <th style={{ ...hdr, ...bb(true,  true,  X.h),  width: '200px' }}>BOTTLENECK</th>
-          <th style={{ ...hdr, ...bb(true,  true,  X.h),  width: '280px' }}>ARTEMIS' EXECUTION</th>
+          <th style={{ ...hdr, ...bb(true,  true,  X.h),  width: '280px' }}>ARDEN'S EXECUTION</th>
           <th style={{ ...hdr, ...bb(false, true,  X.h)                  }}>EXAMPLE SITUATION</th>
         </tr>
       </thead>
@@ -172,12 +161,12 @@ function EvolutionTable() {
           <td style={{ ...pad, ...yr,   ...bb(true,  true,  X.r85) }}>1985</td>
           <td style={{ ...pad, ...body, ...bb(true,  true,  X.r85) }}>Making computers useful inside institutions</td>
           <td style={{ ...pad, ...body, ...bb(true,  true,  X.r85) }}>
-            Artemis sits with finance/ops/marketing to understand a manual process then
+            Arden sits with finance/ops/marketing to understand a manual process then
             translates it into basic computer logic.
           </td>
           <td style={{ ...pad, ...body, ...bb(false, true,  X.r85) }}>
             <p className="mb-0">Hospitals track records through paper, filing cabinets, and phone calls.</p>
-            <p className="mt-3 mb-0">Artemis creates a system: inputs, fields, dependencies, exceptions, outputs. She converts everything to logic.</p>
+            <p className="mt-3 mb-0">Arden creates a system: inputs, fields, dependencies, exceptions, outputs. She converts everything to logic.</p>
           </td>
         </tr>
 
@@ -186,12 +175,12 @@ function EvolutionTable() {
           <td style={{ ...pad, ...yr,   ...bb(true,  true,  X.r98) }}>1998</td>
           <td style={{ ...pad, ...body, ...bb(true,  true,  X.r98) }}>Leveraging the full potential of networks</td>
           <td style={{ ...pad, ...body, ...bb(true,  true,  X.r98) }}>
-            Artemis sees the internet not just as a place to browse pages but also as a
+            Arden sees the internet not just as a place to browse pages but also as a
             distribution layer, commerce layer, and coordination layer.
           </td>
           <td style={{ ...pad, ...body, ...bb(false, true,  X.r98) }}>
             <p className="mb-0">Retailers treat websites like a digital brochure.</p>
-            <p className="mt-3 mb-0">Artemis constructs a world around inventory syncing, payment flows, customer accounts, email capture, etc.</p>
+            <p className="mt-3 mb-0">Arden constructs a world around inventory syncing, payment flows, customer accounts, email capture, etc.</p>
           </td>
         </tr>
 
@@ -203,12 +192,12 @@ function EvolutionTable() {
             <span style={{ color: '#5c5347' }}>(internet is now mainstream)</span>
           </td>
           <td style={{ ...pad, ...body, ...bb(true,  true,  X.r12) }}>
-            Artemis doesn't just ship features; she designs the whole product system around
+            Arden doesn't just ship features; she designs the whole product system around
             retention, data, and scale.
           </td>
           <td style={{ ...pad, ...body, ...bb(false, true,  X.r12) }}>
             <p className="mb-0">A company wants a better app.</p>
-            <p className="mt-3 mb-0">Artemis thinks about onboarding, APIs, experiments, and retention loops.</p>
+            <p className="mt-3 mb-0">Arden thinks about onboarding, APIs, experiments, and retention loops.</p>
           </td>
         </tr>
 
@@ -217,12 +206,12 @@ function EvolutionTable() {
           <td style={{ ...pad, ...yr,   ...bb(true,  true,  X.r26) }}>2026</td>
           <td style={{ ...pad, ...body, ...bb(true,  true,  X.r26) }}>Making AI reliable inside workflows</td>
           <td style={{ ...pad, ...body, ...bb(true,  true,  X.r26) }}>
-            Artemis takes a messy workflow, inserts AI into the right steps, and decides
+            Arden takes a messy workflow, inserts AI into the right steps, and decides
             where humans still need to step in.
           </td>
           <td style={{ ...pad, ...body, ...bb(false, true,  X.r26) }}>
             <p className="mb-0">A manager says "can we use AI for this?"</p>
-            <p className="mt-3 mb-1">Artemis asks:</p>
+            <p className="mt-3 mb-1">Arden asks:</p>
             <ul className="list-disc ml-5 space-y-0.5">
               <li>which part</li>
               <li>with what context</li>
@@ -240,11 +229,11 @@ function EvolutionTable() {
             <span style={{ color: '#9a8e7f' }}>(AI is now mainstream, just like how the internet feels in 2026)</span>
           </td>
           <td style={{ ...pad, ...body, ...bb(true,  false) }}>
-            Artemis allocates intelligence across the business the way an investor allocates money.
+            Arden allocates intelligence across the business the way an investor allocates money.
           </td>
           <td style={{ ...pad, ...body, ...bb(false, false) }}>
             <p className="mb-0">A hospital runs 150 agents across intake, billing, coding, and patient comms.</p>
-            <p className="mt-3 mb-1">Artemis asks:</p>
+            <p className="mt-3 mb-1">Arden asks:</p>
             <ul className="list-disc ml-5 space-y-0.5">
               <li>what should happen automatically</li>
               <li>what needs approval</li>
@@ -258,115 +247,83 @@ function EvolutionTable() {
   )
 }
 
+// ── ARDEN BLOCK (animation #3) ────────────────────────────────────────────────
+// On scroll into view (once): the caption waves in diagonally top-left → bottom-
+// right (same pattern as the homepage bio), and the Arden figure does the name
+// "return fade" (opacity + blur clearing). Tune with the knobs below.
+const ARDEN_WAVE_DUR    = 0.55  // per-word fade duration in the caption wave
+const ARDEN_WAVE_SPREAD = 0.5   // diagonal spread of the wave (bigger = more staggered)
+const ARDEN_FIG_FADE    = 1.75   // figure fade-in duration
+const ARDEN_FIG_BLUR    = 6     // figure starts this blurred (px), clears to 0
+const ARDEN_FIG_DELAY   = 0.3  // wait this long (s) AFTER the text wave starts before the figure begins
+const ARDEN_CAPTION = 'Arden will be our fictional exemplar for these time periods'
+
+function ArdenBlock() {
+  const rootRef = useRef(null)
+  const figRef  = useRef(null)
+  useEffect(() => {
+    const words = rootRef.current.querySelectorAll('.arden-word')
+    const fig   = figRef.current
+    gsap.set(words, { opacity: 0, y: 4, filter: 'blur(3px)' })
+    gsap.set(fig,   { opacity: 0, filter: `blur(${ARDEN_FIG_BLUR}px)` })
+    // Diagonal measure per word (offset within the relatively-positioned caption).
+    const maxDiag = Math.max(...[...words].map(el => el.offsetLeft + el.offsetTop), 1)
+    const st = ScrollTrigger.create({
+      trigger: rootRef.current,
+      start: 'top 80%',
+      once: true,
+      onEnter: () => {
+        gsap.to(words, {
+          opacity: 1, y: 0, filter: 'blur(0px)', duration: ARDEN_WAVE_DUR, ease: 'power2.out',
+          stagger: (i, el) => ((el.offsetLeft + el.offsetTop) / maxDiag) * ARDEN_WAVE_SPREAD,
+        })
+        gsap.to(fig, { opacity: 1, filter: 'blur(0px)', duration: ARDEN_FIG_FADE, delay: ARDEN_FIG_DELAY, ease: 'power2.out' })
+      },
+    })
+    return () => st.kill()
+  }, [])
+  return (
+    <div ref={rootRef} className="flex items-center shrink-0 mt-10">
+      <p className="font-fraunces text-dust mb-0"
+        style={{ ...fv, position: 'relative', fontSize: '15px', lineHeight: '1.6', letterSpacing: '0.15px', width: '240px' }}>
+        {ARDEN_CAPTION.split(' ').flatMap((w, wi, arr) => {
+          const span = (
+            <span key={wi} className="arden-word"
+              style={{ display: 'inline-block', willChange: 'transform, filter, opacity' }}>{w}</span>
+          )
+          return wi < arr.length - 1 ? [span, ' '] : [span]
+        })}
+      </p>
+      {/* ↓ GAP between the caption and the Arden figure: edit ml-7 below.      */}
+      {/*   Tailwind margin-left scale: ml-2=8px, ml-4=16px, ml-6=24px, ml-8=32px. */}
+      <img
+        ref={figRef}
+        src={imgArden}
+        alt="Arden — fictional exemplar"
+        className="ml-7"
+        style={{ display: 'block', flexShrink: 0, willChange: 'filter, opacity' }}
+      />
+    </div>
+  )
+}
+
 // ── PAGE ──────────────────────────────────────────────────────────────────────
 export default function EssayEvolution() {
   const prose680 = { width: '680px' }
-  const body17   = { ...fv, fontSize: '17px', lineHeight: '1.75', letterSpacing: '0.17px' }
+  const body16   = { ...fv, fontSize: '16px', lineHeight: '1.75', letterSpacing: '0.17px' }
 
   return (
-    <div
-      className="relative w-full"
-      style={{
-        background: 'radial-gradient(ellipse 140% 60% at 50% 0%, #fdfcf9 0%, #faf7f2 100%)',
-        overflowX: 'hidden',
-        minHeight: '100vh',
-      }}
-    >
-
-      {/* ── PAPYRUS TEXTURE ──────────────────────────────────────────────── */}
-      {/* Using a <div> with background-image (not <img>) so that            */}
-      {/* position:absolute inset-0 reliably fills the full rendered height  */}
-      {/* of the page div — <img h-full> can under-fill when parent uses     */}
-      {/* min-height instead of an explicit height.                          */}
-      <div
-        className="absolute pointer-events-none select-none"
-        style={{
-          top: 0, right: 0, bottom: 0, left: 0,
-          backgroundImage: `url(${papyrusTexture})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center top',
-          mixBlendMode: 'multiply',
-          opacity: 0.25,
-        }}
-      />
-
-      {/* ── BACK BUTTON ──────────────────────────────────────────────────── */}
-      {/* left: calc(50% - 340px - 84px - 10px)                              */}
-      {/*   50%      = page center                                            */}
-      {/*   - 340px  = left edge of the 680px prose column                   */}
-      {/*   - 84px   = button's natural width (SVG includes 10px padding)    */}
-      {/*   - 10px   = extra breathing room so button isn't flush to prose   */}
-      <Link
-        to="/"
-        className="absolute z-20 hover:opacity-60 transition-opacity duration-200"
-        style={{
-          left: 'calc(50% - 340px - 84px - 10px)',
-          top: '150px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-        }}
-        aria-label="Back to home"
-      >
-        {/* Icon-only SVG; the word is interchangeable text (change "back" → "home") */}
-        <img src={backButton} alt="" style={{ display: 'block', opacity: 0.4 }} />
-        <span style={{ ...fv, fontFamily: 'Fraunces, serif', fontSize: '17px', color: '#9a8e7f', opacity: 0.4 }}>home</span>
-      </Link>
-
-      {/* ── CORNER ORNAMENTS ─────────────────────────────────────────────── */}
-      {/* Assets exported already oriented for their corner — no rotation.  */}
-
-      {/* Top-right */}
-      <div className="absolute pointer-events-none select-none"
-        style={{ right: '39.6px', top: '27px', width: '238px', height: '229px' }}>
-        <img src={cornerTR} alt="" className="w-full h-full" />
-      </div>
-      {/* Top-left */}
-      <div className="absolute pointer-events-none select-none"
-        style={{ left: '39px', top: '27px', width: '236px', height: '232px' }}>
-        <img src={cornerTL} alt="" className="w-full h-full" />
-      </div>
-      {/* Bottom-right */}
-      <div className="absolute pointer-events-none select-none"
-        style={{ right: '39px', bottom: '28px', width: '236px', height: '232px' }}>
-        <img src={cornerBR} alt="" className="w-full h-full" />
-      </div>
-      {/* Bottom-left */}
-      <div className="absolute pointer-events-none select-none"
-        style={{ left: '39px', bottom: '30px', width: '239px', height: '229px' }}>
-        <img src={cornerBL} alt="" className="w-full h-full" />
-      </div>
-
-      {/* ── ESSAY BODY COLUMN ────────────────────────────────────────────── */}
-      <div
-        className="relative mx-auto flex flex-col items-center"
-        style={{ width: '900px', paddingTop: '200px', paddingBottom: `${FOOTER_TAIL - COPYRIGHT_DROP}px` }}
-      >
-
-        {/* Title */}
-        <h1
-          className="font-fraunces text-ink text-center shrink-0"
-          style={{ ...fv, fontSize: '36px', lineHeight: '1.4', letterSpacing: '0.4px', width: '664px', fontWeight: 400 }}
-        >
-          The Evolution of Intelligence
-        </h1>
-
-        {/* Author / Date */}
-        <div className="font-onest text-center shrink-0 mt-6"
-          style={{ fontSize: '15px', lineHeight: '1.6', letterSpacing: '0.05em' }}>
-          <p className="text-ink mb-0.5">Dustin Zhu</p>
-          <p className="text-dust mb-0">June 11, 2026</p>
-        </div>
+    <EssayLayout title="The Evolution of Intelligence" backWord="home">
 
         {/* Lead paragraph */}
-        <p className="font-fraunces text-ink shrink-0 mt-12" style={{ ...body17, ...prose680 }}>
+        <p className="font-fraunces text-ink shrink-0 mt-12" style={{ ...body16, ...prose680 }}>
           History's top performers weren't always the smartest people in the room.
           They were just early - early to see bottlenecks, early to position themselves where tech was rewriting rules, early to compound success.
           This has especially been true since 1970.
         </p>
 
         {/* Bottlenecks label */}
-        <p className="font-fraunces text-ink shrink-0 mt-8" style={{ ...body17, ...prose680 }}>
+        <p className="font-fraunces text-ink shrink-0 mt-8" style={{ ...body16, ...prose680 }}>
           Tech/operational bottlenecks by time periods:
         </p>
 
@@ -376,7 +333,7 @@ export default function EssayEvolution() {
         </div>
 
         {/* Pattern paragraph */}
-        <p className="font-fraunces text-ink shrink-0 mt-6" style={{ ...body17, ...prose680 }}>
+        <p className="font-fraunces text-ink shrink-0 mt-6" style={{ ...body16, ...prose680 }}>
           The common pattern has been: <br />
           {[
             'new technology appears',
@@ -398,23 +355,12 @@ export default function EssayEvolution() {
         </h2>
 
         {/* Table intro */}
-        <p className="font-fraunces text-ink shrink-0 mt-4" style={{ ...body17, ...prose680 }}>
-          Below is a deeper look at what each era looks like:
+        <p className="font-fraunces text-ink shrink-0 mt-4" style={{ ...body16, ...prose680 }}>
+          Below is a deeper dive into what each era looks like:
         </p>
 
-        {/* Artemis + caption — centered as a unit. Text 289px wide (Figma) forces  */}
-        {/* line break at "exemplar". Figure at natural SVG size (31×77px). No italic. */}
-        <div className="flex items-center shrink-0 mt-10">
-          <p className="font-fraunces text-dust mb-0"
-            style={{ ...fv, fontSize: '15px', lineHeight: '1.6', letterSpacing: '0.15px', width: '270px' }}>
-            Artemis will be our fictional exemplar for these time periods
-          </p>
-          <img
-            src={imgArtemis}
-            alt="Artemis — fictional exemplar"
-            style={{ display: 'block', flexShrink: 0 }}
-          />
-        </div>
+        {/* Arden + caption — wave-in caption + ink/return-fade figure on scroll-in */}
+        <ArdenBlock />
 
         {/* Table — full 900px column width */}
         <div className="shrink-0 w-full mt-12">
@@ -428,7 +374,7 @@ export default function EssayEvolution() {
         </h2>
 
         {/* Closing content */}
-        <div className="font-fraunces text-ink shrink-0 mt-4" style={{ ...body17, ...prose680 }}>
+        <div className="font-fraunces text-ink shrink-0 mt-4" style={{ ...body16, ...prose680 }}>
           <p className="mb-1">Every innovation wave changes what society admires:</p>
           <ul className="list-disc ml-6 mb-6">
             <li>The early computer era rewarded people who could operate the machine</li>
@@ -446,13 +392,6 @@ export default function EssayEvolution() {
           </p>
         </div>
 
-        {/* Copyright */}
-        <p className="font-onest text-dust text-center shrink-0"
-          style={{ fontSize: '13px', letterSpacing: '0.08em', marginTop: `${COPYRIGHT_DROP}px` }}>
-          © 2026 Dustin Zhu
-        </p>
-
-      </div>
-    </div>
+    </EssayLayout>
   )
 }

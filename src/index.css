@@ -5,6 +5,11 @@
 /* ── GLOBAL RESETS ───────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
+/* ── TEXT SELECTION ──────────────────────────────────────── */
+/* Highlighting text shows a soft gold wash (#b8a97a) instead of the OS blue. */
+::selection { background: rgba(184, 169, 122, 0.35); }
+::-moz-selection { background: rgba(184, 169, 122, 0.35); }
+
 html, body, #root {
   width: 100%;
   /* min-height instead of height so scrollable pages (essays) can expand past 100vh.
@@ -45,34 +50,20 @@ body {
   --aegean-deep:   #2a4a75;
 }
 
+/* ── ROUTE FADE ──────────────────────────────────────────── */
+/* The page-transition fade (see AnimatedRoutes in App.jsx). 150ms ease-out,
+   fill-mode `both` so the element holds opacity:1 after it completes. */
+@keyframes route-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.route-fade {
+  animation: route-fade-in 0.15s ease-out both;
+}
+
 /* ── FRAUNCES VARIABLE FONT DEFAULT AXES ─────────────────── */
 /* Apply SOFT=0 WONK=1 globally to all Fraunces usage         */
 .font-fraunces {
   font-variation-settings: 'SOFT' 0, 'WONK' 1;
 }
 
-/* ── ESSAY TYPOGRAPHY HELPERS ────────────────────────────── */
-.essay-body {
-  font-family: 'Crimson Pro', serif;
-  font-size: 16px;
-  line-height: 1.8;
-  color: var(--ink);
-}
-
-.essay-lead {
-  font-family: 'Crimson Pro', serif;
-  font-size: 19px;
-  line-height: 1.55;
-  font-style: italic;
-  color: var(--ink);
-}
-
-/* ── SMALL CAPS LABEL ────────────────────────────────────── */
-.label {
-  font-family: 'Onest', sans-serif;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--dust);
-}

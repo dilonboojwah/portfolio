@@ -1,24 +1,6 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-
-// ── ALL LOCAL ASSETS ──────────────────────────────────────────────────────────
-import papyrusTexture from '../assets/image/homepage-papyrusfilter.webp'
-import cornerTR       from '../assets/illustration/essayborder-tr.svg'
-import cornerTL       from '../assets/illustration/essayborder-tl.svg'
-import cornerBL       from '../assets/illustration/essayborder-bl.svg'
-import cornerBR       from '../assets/illustration/essayborder-br.svg'
-import backButton     from '../assets/illustration/backbutton.svg'
-
-// Fraunces variable font axes
-const fv = { fontVariationSettings: "'SOFT' 0, 'WONK' 1" }
-
-// ── FOOTER TAIL ─────────────────────────────────────────────────────────────
-// Space below the last paragraph = the gap ABOVE the © line (COPYRIGHT_DROP) +
-// the gap BELOW it (the column's paddingBottom). They always sum to FOOTER_TAIL,
-// so raising COPYRIGHT_DROP moves the copyright LOWER without changing the total
-// page height. ← To nudge the copyright, change COPYRIGHT_DROP only.
-const FOOTER_TAIL = 236
-const COPYRIGHT_DROP = 160   // was 96 (the old mt-24); +24 = 24px lower
+import { fv }       from '../lib/theme'
+import EssayLayout  from '../components/EssayLayout'
 
 // ── CHEVRON ───────────────────────────────────────────────────────────────────
 function ChevronRight({ open }) {
@@ -118,7 +100,7 @@ function PillSequence({ pills }) {
         const els = [
           <span key={`p${i}`} style={{
             ...fv,
-            fontFamily: 'Fraunces, serif',
+            fontFamily: "Fraunces, Georgia, 'Times New Roman', serif",
             fontSize: '16px', fontWeight: 400,
             color: '#3d6191',
           }}>
@@ -128,7 +110,7 @@ function PillSequence({ pills }) {
         if (i < pills.length - 1) {
           els.push(
             <span key={`a${i}`} style={{
-              fontFamily: 'Fraunces, serif',
+              fontFamily: "Fraunces, Georgia, 'Times New Roman', serif",
               fontSize: '15px', color: '#c9a84c',
             }}>
               →
@@ -144,7 +126,7 @@ function PillSequence({ pills }) {
 // ── PAGE ──────────────────────────────────────────────────────────────────────
 export default function EssayCoordination() {
   const prose680 = { width: '100%', maxWidth: '680px' }
-  const body17   = { ...fv, fontSize: '17px', lineHeight: '1.75', letterSpacing: '0.17px' }
+  const body16   = { ...fv, fontSize: '16px', lineHeight: '1.75', letterSpacing: '0.17px' }
   const body15   = { ...fv, fontSize: '15px', lineHeight: '1.7',  letterSpacing: '0.15px' }
 
   // "I. Workflow design" labels in Points of Failure — small, dust, centered
@@ -155,102 +137,23 @@ export default function EssayCoordination() {
 
   // "Create legible workflows" subtitle — Onest, small, light, NOT italic
   const subtitleLbl = {
-    fontFamily: 'Onest, sans-serif',
+    fontFamily: "Onest, system-ui, -apple-system, 'Segoe UI', sans-serif",
     fontSize: '12px', fontWeight: 400,
     letterSpacing: '0.06em', color: '#b0a695',
     textAlign: 'center',
   }
 
   return (
-    <div
-      className="relative w-full"
-      style={{
-        background: 'radial-gradient(ellipse 140% 60% at 50% 0%, #fdfcf9 0%, #faf7f2 100%)',
-        overflowX: 'hidden',
-        minHeight: '100dvh',
-      }}
-    >
-
-      {/* ── PAPYRUS TEXTURE ──────────────────────────────────────────────── */}
-      <div
-        className="absolute pointer-events-none select-none"
-        style={{
-          top: 0, right: 0, bottom: 0, left: 0,
-          backgroundImage: `url(${papyrusTexture})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center top',
-          backgroundAttachment: 'fixed',
-          mixBlendMode: 'multiply',
-          opacity: 0.25,
-        }}
-      />
-
-      {/* ── BACK BUTTON ──────────────────────────────────────────────────── */}
-      {/* top: 100px — above content (starts at 200px), below corner tip     */}
-      <Link
-        to="/"
-        className="absolute z-20 hover:opacity-60 transition-opacity duration-200"
-        style={{
-          left: 'calc(50% - 340px - 84px - 10px)',
-          top: '150px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-        }}
-        aria-label="Back to home"
-      >
-        {/* Icon-only SVG; the word is interchangeable text (change "back" → "home") */}
-        <img src={backButton} alt="" style={{ display: 'block', opacity: 0.4 }} />
-        <span style={{ ...fv, fontFamily: 'Fraunces, serif', fontSize: '17px', color: '#9a8e7f', opacity: 0.4 }}>back</span>
-      </Link>
-
-      {/* ── CORNER ORNAMENTS ─────────────────────────────────────────────── */}
-      <div className="absolute pointer-events-none select-none"
-        style={{ right: '39.6px', top: '27px', width: '238px', height: '229px' }}>
-        <img src={cornerTR} alt="" className="w-full h-full" />
-      </div>
-      <div className="absolute pointer-events-none select-none"
-        style={{ left: '39px', top: '27px', width: '236px', height: '232px' }}>
-        <img src={cornerTL} alt="" className="w-full h-full" />
-      </div>
-      <div className="absolute pointer-events-none select-none"
-        style={{ right: '39px', bottom: '28px', width: '236px', height: '232px' }}>
-        <img src={cornerBR} alt="" className="w-full h-full" />
-      </div>
-      <div className="absolute pointer-events-none select-none"
-        style={{ left: '39px', bottom: '30px', width: '239px', height: '229px' }}>
-        <img src={cornerBL} alt="" className="w-full h-full" />
-      </div>
-
-      {/* ── ESSAY BODY COLUMN ────────────────────────────────────────────── */}
-      <div
-        className="relative mx-auto flex flex-col items-center"
-        style={{ width: '100%', maxWidth: '900px', paddingTop: '200px', paddingBottom: `${FOOTER_TAIL - COPYRIGHT_DROP}px` }}
-      >
-
-        {/* Title */}
-        <h1
-          className="font-fraunces text-ink text-center shrink-0"
-          style={{ ...fv, fontSize: '36px', lineHeight: '1.4', letterSpacing: '0.4px', width: '664px', fontWeight: 400 }}
-        >
-          Solving Human-AI Coordination
-        </h1>
-
-        {/* Author / Date */}
-        <div className="font-onest text-center shrink-0 mt-6"
-          style={{ fontSize: '15px', lineHeight: '1.6', letterSpacing: '0.05em' }}>
-          <p className="text-ink mb-0.5">Dustin Zhu</p>
-          <p className="text-dust mb-0">June 11, 2026</p>
-        </div>
+    <EssayLayout title="Solving Human-AI Coordination" backWord="home">
 
         {/* Intro 1 */}
-        <p className="font-fraunces text-ink shrink-0 mt-12" style={{ ...body17, ...prose680 }}>
+        <p className="font-fraunces text-ink shrink-0 mt-12" style={{ ...body16, ...prose680 }}>
           Every month major labs release models that are cheaper, higher quality, and more reliable.
           As intelligence gets commoditized, the moat becomes human-AI coordination.
         </p>
 
         {/* Intro 2 */}
-        <p className="font-fraunces text-ink shrink-0 mt-5" style={{ ...body17, ...prose680 }}>
+        <p className="font-fraunces text-ink shrink-0 mt-5" style={{ ...body16, ...prose680 }}>
           Most companies will fall short for a simple reason: they do not define what good work looks
           like, preserve context, or measure outputs.
         </p>
@@ -263,7 +166,7 @@ export default function EssayCoordination() {
           Points of Failure
         </h2>
 
-        <p className="font-fraunces text-ink shrink-0 mt-4" style={{ ...body17, ...prose680 }}>
+        <p className="font-fraunces text-ink shrink-0 mt-4" style={{ ...body16, ...prose680 }}>
           With AI widespread now, an org is susceptible to 3 points of failure.
         </p>
 
@@ -424,7 +327,7 @@ export default function EssayCoordination() {
           Closing Thoughts
         </h2>
 
-        <div className="font-fraunces text-ink shrink-0 mt-4" style={{ ...body17, ...prose680 }}>
+        <div className="font-fraunces text-ink shrink-0 mt-4" style={{ ...body16, ...prose680 }}>
           <p className="mb-5">
             Human-AI coordination fails when firms cannot make work legible. A company needs clear
             task boundaries, explicit context, measurable outcomes, and named ownership.
@@ -439,13 +342,6 @@ export default function EssayCoordination() {
           </p>
         </div>
 
-        {/* Copyright */}
-        <p className="font-onest text-dust text-center shrink-0"
-          style={{ fontSize: '13px', letterSpacing: '0.08em', marginTop: `${COPYRIGHT_DROP}px` }}>
-          © 2026 Dustin Zhu
-        </p>
-
-      </div>
-    </div>
+    </EssayLayout>
   )
 }

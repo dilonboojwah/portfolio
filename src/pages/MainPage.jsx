@@ -1,31 +1,53 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import gsap from 'gsap'
+import { fv, PAGE_BG } from '../lib/theme'
 
 // ── ANIMATION KNOBS ──────────────────────────────────────────────────────────
-const NAME_START_DELAY = 0.4       // wait this long (s) after the PAGE LOADS before the name starts typing
-const NAME_TYPE_TIME = 0.425     // "Dustin Zhu" letters type-IN total (seconds)
-const ZHU_IN = 0.175               // 朱 (zhu) entrance — seconds after the name sequence starts
-const DI_IN = 0.3              // 谛 (di) entrance — seconds after the name sequence starts
-const NAME_OUT_TIME = 0.175     // letters type-OUT total — quicker than the in
-const CHAR_OUT_STAGGER = 0.08  // 谛 leaves this many seconds after 朱 on type-OUT
-const LETTER_DUR = 0.2        // per-LETTER fade duration for the English name (small = crisp typewriter)
-const CHAR_DUR = 0.5          // per-CHARACTER fade duration for 朱谛 (independent from the letters)
-const NAME_RETURN_DELAY = 0.45  // wait after mouse-leave before the name retypes in
-const WAVE_SPREAD = 0.5        // About diagonal-wave spread (shape, not overall speed)
-const HOVER_WAVE_SPEED = 1.15  // hover wave (in) plays this × faster
-const ABOUT_OUT_SPEEDUP = 1.3  // About wave-OUT is this × faster than the in
+// Every value below is in SECONDS. Rule of thumb: BIGGER = slower / more spread
+// out, SMALLER = quicker / snappier. There are 4 separate moments, grouped below.
+//
+// A note on "spread" vs "entrance time" (they show up a lot):
+//   • spread       = ONE number shared by all glyphs; their start times are spaced
+//                    evenly across that window (e.g. 9 letters spread over 0.5s).
+//   • entrance time = the exact moment ONE specific glyph starts (used for 朱 / 谛).
+
+// ▸ 1. INITIAL TYPEWRITER — plays on first load, on refresh, and when you come
+//      back to the page from an artifact. "Dustin Zhu" types in letter-by-letter,
+//      then 朱 and 谛 each pop in at their own moment.
+const NAME_START_DELAY = 0.4    // pause after the page loads before the name starts appearing
+const NAME_TYPE_TIME   = 0.5    // spread: total window for all 9 English letters to start typing in
+const LETTER_DUR       = 0.3    // how long EACH English letter takes to fade in (also reused on type-out)
+const ZHU_IN           = 0.125  // entrance time of 朱 — seconds after the name sequence starts
+const DI_IN            = 0.3    // entrance time of 谛 — seconds after the name sequence starts
+const CHAR_DUR         = 0.5    // how long EACH Chinese character takes to fade (also reused on type-out)
+
+// ▸ 2. TYPE-OUT — plays when the cursor ENTERS the center (name leaves so the bio
+//      can arrive). Deliberately quicker than the type-in.
+const NAME_OUT_TIME    = 0.175  // spread: total window for the 9 letters to fade back out
+const CHAR_OUT_STAGGER = 0.08   // gap between 朱 leaving and 谛 leaving on the way out
+
+// ▸ 3. RETURN FADE — plays when the cursor LEAVES the center. This is NOT the
+//      typewriter: the whole name fades in together while drifting forward
+//      (scale-up + blur→sharp), so it reads as coming "from behind".
+const NAME_RETURN_DELAY = 0.3  // pause after the cursor leaves before the name comes back
+const NAME_RETURN_FADE  = 1   // how long the whole-name fade-in takes
+const NAME_RETURN_SCALE = 1   // starting size (smaller = starts further "behind"); grows to 1.0
+
+// ▸ 4. ABOUT BIO WAVE — the hidden bio text that waves in (on hover) and out
+//      (on leave) diagonally, top-left → bottom-right.
+const ABOUT_IN_BASE     = 0.55  // base fade duration for each word as it waves in
+const WAVE_SPREAD       = 0.5   // diagonal spread: bigger = longer gap between the first (top-left) and last (bottom-right) word
+const HOVER_WAVE_SPEED  = 1.15  // overall speed of the wave-IN — bigger = faster (divides both the duration AND the spread)
+const ABOUT_OUT_SPEEDUP = 1.2   // the wave-OUT is this many × faster than the wave-in
 
 // ── LOCAL ASSETS ──────────────────────────────────────────────────────────────
-import papyrusTexture   from '../assets/image/homepage-papyrusfilter.webp'
+import PapyrusTexture   from '../components/PapyrusTexture'
 import blossomTree      from '../assets/illustration/homepage-blossomtree.svg'
 import mountains        from '../assets/illustration/homepage-mountains.svg'
-import patternChatbot   from '../assets/illustration/homepage-pattern-chatbotcard.svg'
+import patternArtemis   from '../assets/illustration/homepage-pattern-artemis.svg'
 import patternProse     from '../assets/illustration/homepage-pattern-prose.svg'
 import patternCulinary  from '../assets/illustration/homepage-pattern-culinary.svg'
-
-// Fraunces variable font axes
-const fv = { fontVariationSettings: "'SOFT' 0, 'WONK' 1" }
 
 // ── REFERENCE FRAME ─────────────────────────────────────────────────────────
 // The whole composition is authored against the Figma 1440×900 artboard, then
@@ -70,13 +92,13 @@ const CARD_TEXT_H = Math.round(CARD_H * 0.45) // 45% text block / 55% pattern ha
 // gutters, ~164px clearance from the calligraphy, vertical span centered on 450.
 // The cards are the navigation: external for the app, internal routes otherwise.
 const cards = [
-  { label: 'APP',     title: 'Artemis: Career Clarity Engine',                 pattern: patternChatbot,  href: 'https://valuechatbot.dustinzhu.com', external: true,  x: 110,  y: 470 },
+  { label: 'APP',     title: 'Artemis', subtitle: 'career clarity engine',     pattern: patternArtemis,  href: 'https://artemis.com',                external: true,  x: 110,  y: 470 },
   { label: 'PROSE',   title: 'The Evolution of Intelligence', pattern: patternProse,    href: '/essays/evolution',                  external: false, x: 310,  y: 390 },
   { label: 'PROSE',   title: 'Solving Human-AI Coordination', pattern: patternProse,    href: '/essays/coordination',               external: false, x: 980,  y: 210 },
   { label: 'GALLERY', title: 'Culinary Repertoire',           pattern: patternCulinary, href: '/culinary',                          external: false, x: 1180, y: 130 },
 ]
 
-function ArtifactCard({ label, title, pattern }) {
+function ArtifactCard({ label, title, subtitle, pattern }) {
   return (
     <div style={{
       width: `${CARD_W}px`,
@@ -98,20 +120,28 @@ function ArtifactCard({ label, title, pattern }) {
         alignItems: 'flex-end',
         overflow: 'hidden',
       }}>
-        <p style={{
-          fontFamily: "'Cinzel', serif", fontWeight: 400,
+        <p className="text-gold" style={{
+          fontFamily: "Cinzel, 'Trajan Pro', 'Times New Roman', serif", fontWeight: 400,
           fontSize: '16px', lineHeight: 1, letterSpacing: '0.4px',
-          color: '#b8a97a', textAlign: 'center', whiteSpace: 'nowrap', margin: 0,
+          textAlign: 'center', whiteSpace: 'nowrap', margin: 0,
         }}>
           {label}
         </p>
-        <p className="font-fraunces" style={{
-          ...fv,
-          fontSize: '20px', lineHeight: 1.25, letterSpacing: '0.13px',
-          color: '#5c5347', textAlign: 'right', width: '100%', margin: 0,
-        }}>
-          {title}
-        </p>
+        {subtitle ? (
+          // Two-line title (the Artemis card): name + dust subtitle, per Figma card-artemis.
+          <div className="font-fraunces" style={{ ...fv, textAlign: 'right', width: '100%', letterSpacing: '0.2px' }}>
+            <p className="text-stone" style={{ fontSize: '20px', lineHeight: 1.5, margin: 0 }}>{title}</p>
+            <p className="text-dust"  style={{ fontSize: '12px', lineHeight: 1.5, margin: 0 }}>{subtitle}</p>
+          </div>
+        ) : (
+          <p className="font-fraunces text-stone" style={{
+            ...fv,
+            fontSize: '20px', lineHeight: 1.25, letterSpacing: '0.13px',
+            textAlign: 'right', width: '100%', margin: 0,
+          }}>
+            {title}
+          </p>
+        )}
       </div>
 
       {/* Pattern half — exported SVG is pre-fitted to the card bottom (100×105) */}
@@ -165,8 +195,26 @@ export default function MainPage() {
     }
   }
 
+  // ── Name return fade ─────────────────────────────────────────────────────────
+  // Used ONLY when the cursor leaves the center (the name coming back). Unlike the
+  // initial typewriter (typeName), every letter + character fades in TOGETHER as a
+  // single unit — no per-glyph stagger. A slight scale-up + blur-clear on the whole
+  // group makes the name read as drifting "from behind to front" into focus.
+  const nameFadeIn = (delay = 0) => {
+    const glyphs = [...gsap.utils.toArray('.name-letter'), ...gsap.utils.toArray('.name-char')]
+    const group  = centerRef.current?.querySelector('.name-group')
+    gsap.fromTo(glyphs, { opacity: 0 },
+      { opacity: 1, overwrite: 'auto', delay, duration: NAME_RETURN_FADE, ease: 'power2.out' })
+    if (group) {
+      gsap.fromTo(group,
+        { scale: NAME_RETURN_SCALE, filter: 'blur(6px)' },
+        { scale: 1, filter: 'blur(0px)', transformOrigin: 'center center',
+          overwrite: 'auto', delay, duration: NAME_RETURN_FADE, ease: 'power2.out' })
+    }
+  }
+
   // ── About diagonal wave — standalone tweens (overwrite keeps toggling clean) ──
-  const ABOUT_IN_DUR = 0.55 / HOVER_WAVE_SPEED
+  const ABOUT_IN_DUR = ABOUT_IN_BASE / HOVER_WAVE_SPEED
   const ABOUT_IN_SPREAD = WAVE_SPREAD / HOVER_WAVE_SPEED
   const aboutWave = (show) => {
     const words = gsap.utils.toArray('.about-word')
@@ -179,10 +227,10 @@ export default function MainPage() {
         { opacity: 0.9, y: 0, filter: 'blur(0px)', overwrite: 'auto', duration: ABOUT_IN_DUR, ease: 'power2.out',
           stagger: (i, el) => diag(el) * ABOUT_IN_SPREAD })
     } else {
-      // out: 20% faster, OPPOSITE direction (BR→TL), ease-OUT begins at full speed (no lead-in)
+      // out: faster, SAME diagonal direction as the in (TL→BR), ease-OUT begins at full speed (no lead-in)
       gsap.to(words,
         { opacity: 0, y: 4, filter: 'blur(3px)', overwrite: 'auto', duration: ABOUT_IN_DUR / ABOUT_OUT_SPEEDUP, ease: 'power2.out',
-          stagger: (i, el) => (1 - diag(el)) * ABOUT_IN_SPREAD / ABOUT_OUT_SPEEDUP })
+          stagger: (i, el) => diag(el) * ABOUT_IN_SPREAD / ABOUT_OUT_SPEEDUP })
     }
   }
 
@@ -194,7 +242,7 @@ export default function MainPage() {
   const handleLeave = () => {
     retypeRef.current?.kill()
     aboutWave(false)  // About waves out
-    retypeRef.current = gsap.delayedCall(NAME_RETURN_DELAY, () => typeName(true)) // then retype the name
+    retypeRef.current = gsap.delayedCall(NAME_RETURN_DELAY, () => nameFadeIn()) // then the name fades back in (unified)
   }
 
   // First visit — type the name in. GSAP pauses/resumes its own ticker with tab
@@ -211,19 +259,13 @@ export default function MainPage() {
       width: '100vw',
       height: '100dvh',
       overflow: 'hidden',
-      background: 'radial-gradient(ellipse 140% 60% at 50% 0%, #fdfcf9 0%, #faf7f2 100%)',
+      background: PAGE_BG,
     }}>
 
       {/* ── AMBIENT LAYER — viewport-anchored, full-bleed ───────────────────── */}
 
       {/* Papyrus texture — fills the whole viewport */}
-      <img
-        src={papyrusTexture}
-        alt=""
-        aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
-        style={{ mixBlendMode: 'multiply', opacity: 0.25 }}
-      />
+      <PapyrusTexture />
 
       {/* Blossom — tangent to LEFT edge; scales with the scene, distance from top scales too */}
       <img
@@ -270,14 +312,14 @@ export default function MainPage() {
         >
           {/* NAME layer — 50px inset lands it at the artboard center (x=720, top=249) */}
           <div
-            className="flex flex-col items-center text-center"
+            className="name-group flex flex-col items-center text-center"
             style={{ position: 'absolute', left: '50px', top: '50px', width: '191px', gap: '6px', pointerEvents: 'none' }}
           >
             {/* "Dustin Zhu" — typed out letter-by-letter (typewriter): each letter
                 pops in discretely, left→right, via a staggered opacity. */}
             <p
-              className="font-fraunces"
-              style={{ ...fv, fontSize: '28px', fontWeight: 900, lineHeight: 1, letterSpacing: '0.98px', color: '#9a8e7f', whiteSpace: 'nowrap', margin: 0 }}
+              className="font-fraunces text-dust"
+              style={{ ...fv, fontSize: '28px', fontWeight: 900, lineHeight: 1, letterSpacing: '0.98px', whiteSpace: 'nowrap', margin: 0 }}
             >
               {'Dustin Zhu'.split('').map((ch, i) =>
                 ch === ' '
@@ -289,8 +331,8 @@ export default function MainPage() {
             {/* 朱谛 — simple text (Ma Shan Zheng), the two characters stacked and typed
                 out one at a time (朱 then 谛) over the same total time as "Dustin Zhu". */}
             <div
-              className="font-chinese"
-              style={{ marginTop: '16px', lineHeight: 1.15, letterSpacing: '-1.56px', color: '#9a8e7f', textAlign: 'center' }}
+              className="font-chinese text-dust"
+              style={{ marginTop: '16px', lineHeight: 1.15, letterSpacing: '-1.56px', textAlign: 'center' }}
             >
               {['朱', '谛'].map((ch, i) => (
                 <span key={i} className="name-char"
@@ -305,8 +347,8 @@ export default function MainPage() {
               this the offsetParent the wave math measures each word against. */}
           <div style={{ position: 'absolute', left: '50px', top: '91px', width: '191px', display: 'flex', flexDirection: 'column', gap: '10px', pointerEvents: 'none' }}>
             {aboutParas.map((text, i) => (
-              <p key={i} className="font-fraunces"
-                style={{ ...fv, fontSize: '14px', lineHeight: 1.5, letterSpacing: '0.14px', color: '#1c1814', margin: 0, width: '100%' }}>
+              <p key={i} className="font-fraunces text-ink"
+                style={{ ...fv, fontSize: '14px', lineHeight: 1.5, letterSpacing: '0.14px', margin: 0, width: '100%' }}>
                 {text.split(' ').flatMap((w, wi, arr) => {
                   const span = (
                     <span key={`w${wi}`} className="about-word"
@@ -322,9 +364,9 @@ export default function MainPage() {
         </div>
 
         {/* Artifact cards — the navigation, arranged as an ascending staircase */}
-        {cards.map(({ label, title, pattern, href, external, x, y }) => {
+        {cards.map(({ label, title, subtitle, pattern, href, external, x, y }) => {
           const positioned = { position: 'absolute', left: `${x}px`, top: `${y}px`, zIndex: 10 }
-          const card = <ArtifactCard label={label} title={title} pattern={pattern} />
+          const card = <ArtifactCard label={label} title={title} subtitle={subtitle} pattern={pattern} />
 
           return external ? (
             <a

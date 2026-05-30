@@ -22,13 +22,14 @@ export default {
       },
 
       // ── FONTS (exact from Figma typography system) ──────────────────────
+      // Each family ends in a LOCALLY-INSTALLED font + a generic, so the page
+      // stays on-brand even if Google Fonts is slow/blocked/offline.
       fontFamily: {
-        fraunces: ['Fraunces', 'serif'],              // display, headings, nav
-        chinese:  ['"Ma Shan Zheng"', 'serif'],       // 朱谛 characters
-        onest:    ['Onest', 'sans-serif'],             // UI labels, captions, nav
-        crimson:  ['"Crimson Pro"', 'serif'],          // essay body text
-        cinzel:   ['Cinzel', 'serif'],                 // culinary page title
-        fell:     ['"IM Fell English"', 'serif'],      // culinary page headings + body
+        fraunces: ['Fraunces', 'Georgia', '"Times New Roman"', 'serif'],            // display, headings, body
+        chinese:  ['"Ma Shan Zheng"', '"KaiTi"', '"STKaiti"', 'serif'],             // 朱谛 — falls back to system brush/kai faces
+        onest:    ['Onest', 'system-ui', '-apple-system', '"Segoe UI"', 'sans-serif'], // UI labels, captions
+        cinzel:   ['Cinzel', '"Trajan Pro"', '"Times New Roman"', 'serif'],         // Roman-caps labels/titles
+        fell:     ['"IM Fell English"', 'Georgia', '"Times New Roman"', 'serif'],   // culinary headings + body
       },
 
       // ── TYPE SCALE (from Figma typography frame) ────────────────────────

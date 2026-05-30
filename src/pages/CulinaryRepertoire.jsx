@@ -1,4 +1,11 @@
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { fv, PAGE_BG } from '../lib/theme'
+import PapyrusTexture from '../components/PapyrusTexture'
+
+gsap.registerPlugin(ScrollTrigger)
 
 // ── ILLUSTRATIONS ─────────────────────────────────────────────────────────────
 import flowerCornerTL   from '../assets/illustration/culinaryrep-flowers-corner-tl.svg'
@@ -10,13 +17,17 @@ import flowerRight5     from '../assets/illustration/culinaryrep-flowers-rightsi
 import flowerLeft3      from '../assets/illustration/culinaryrep-flowers-leftside-3.svg'
 import flowerLeft4      from '../assets/illustration/culinaryrep-flowers-leftside-4.svg'
 import titleUnderline   from '../assets/illustration/culinaryrep-titleunderline.svg'
-import dividerdots      from '../assets/illustration/culinaryrep-dividerdots.svg'
+import dividerdotsRaw   from '../assets/illustration/culinaryrep-dividerdots.svg?raw'
 import menuUnderline    from '../assets/illustration/cookingpage-menuunderline.svg'
 import archiveVertBorder from '../assets/illustration/culinaryrep-archive-verticalborder.svg'
 import backButton       from '../assets/illustration/backbutton-culinary.svg'
+import hoveredL        from '../assets/illustration/culinaryrep-gallery-l-hovered.svg'
+import hoveredML       from '../assets/illustration/culinaryrep-gallery-ml-hovered.svg'
+import hoveredM        from '../assets/illustration/culinaryrep-gallery-m-hovered.svg'
+import hoveredMR       from '../assets/illustration/culinaryrep-gallery-mr-hovered.svg'
+import hoveredR        from '../assets/illustration/culinaryrep-gallery-r-hovered.svg'
 
 // ── PHOTOS ───────────────────────────────────────────────────────────────────
-import papyrusTexture   from '../assets/image/homepage-papyrusfilter.webp'
 import photoEthos       from '../assets/image/culinaryrep-personalbartending.webp'
 import galleryL         from '../assets/image/culinaryrep-gallery-l.webp'
 import galleryML        from '../assets/image/culinaryrep-gallery-ml.webp'
@@ -30,28 +41,64 @@ import photoFranceAsia  from '../assets/image/culinaryrep-franceamericaseasia.we
 import photoFriendsBday from '../assets/image/culinaryrep-friendsbday.webp'
 
 // ── FONT SHORTHANDS ───────────────────────────────────────────────────────────
-const fv     = { fontVariationSettings: "'SOFT' 0, 'WONK' 1" }
-const cinzel = { fontFamily: "'Cinzel', serif", fontWeight: 400 }
-const fell   = { fontFamily: "'IM Fell English', serif", fontStyle: 'normal' }
+// fv (Fraunces axes) is shared site-wide via ../lib/theme. cinzel + fell are
+// only used on this page, so they stay local.
+const cinzel = { fontFamily: "Cinzel, 'Trajan Pro', 'Times New Roman', serif", fontWeight: 400 }
+const fell   = { fontFamily: "'IM Fell English', Georgia, 'Times New Roman', serif", fontStyle: 'normal' }
 
 // ── DIVIDER DOTS ──────────────────────────────────────────────────────────────
-// Pre-composed SVG — three dimensional circles spaced 35px apart
+// Three stacked dots. Inlined (via the raw SVG) instead of an <img> so each dot is
+// its own targetable <g>. On scroll into view the dots fade in TOP→BOTTOM in quick
+// succession, ONCE per visit (won't replay on scroll-up; a refresh remounts + replays).
+//   • DOTS_FADE   = how long each dot takes to fade in
+//   • DOTS_STAGGER = gap between consecutive dots (bigger = more "one after another")
+const DOTS_FADE = 0.22
+const DOTS_STAGGER = 0.13
 function DividerDots() {
+  const ref = useRef(null)
+  useEffect(() => {
+    const groups = ref.current?.querySelectorAll('g')
+    if (!groups?.length) return
+    gsap.set(groups, { opacity: 0 })                       // start hidden
+    const st = ScrollTrigger.create({
+      trigger: ref.current,
+      start: 'top 88%',                                    // fire when the dots are ~12% up from the bottom
+      once: true,
+      onEnter: () => gsap.to(groups, { opacity: 0.4, duration: DOTS_FADE, stagger: DOTS_STAGGER, ease: 'power1.out' }),
+    })
+    return () => st.kill()
+  }, [])
   return (
-    <img
-      src={dividerdots}
-      alt=""
+    <div
+      ref={ref}
       aria-hidden="true"
-      style={{ width: '17px', height: '88px', display: 'block', pointerEvents: 'none', userSelect: 'none', margin: '24px 0' }}
+      style={{ width: '17px', height: '88px', margin: '24px 0', pointerEvents: 'none', userSelect: 'none' }}
+      dangerouslySetInnerHTML={{ __html: dividerdotsRaw }}
     />
   )
 }
 
 // ── ARCHIVE PHOTO ─────────────────────────────────────────────────────────────
 // Photo with a small caption centered below it
-function ArchivePhoto({ src, caption, w, h }) {
+// `speed` drives the parallax: as the archive scrolls through the viewport, the
+// photo + its caption drift vertically by ±speed px (the drift is 0 at the centre,
+// so the rows line up when the section is centred on screen). Photos in the SAME
+// ROW share a speed so the row stays horizontally aligned; the two rows use
+// DIFFERENT speeds — that difference is the parallax you see between them.
+// ← Tune the two row speeds in the JSX below (keep each row's values equal).
+function ArchivePhoto({ src, caption, w, h, speed = 0 }) {
+  const ref = useRef(null)
+  useEffect(() => {
+    if (!speed) return
+    const el = ref.current
+    const tw = gsap.fromTo(el, { y: speed }, {
+      y: -speed, ease: 'none',
+      scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true },
+    })
+    return () => { if (tw.scrollTrigger) tw.scrollTrigger.kill(); tw.kill() }
+  }, [speed])
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+    <div ref={ref} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
       <div style={{ width: `${w}px`, height: `${h}px`, overflow: 'hidden', flexShrink: 0 }}>
         <img
           src={src}
@@ -59,12 +106,11 @@ function ArchivePhoto({ src, caption, w, h }) {
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', pointerEvents: 'none' }}
         />
       </div>
-      <p style={{
+      <p className="text-stone" style={{
         ...fell,
         fontSize: '14px',
         lineHeight: '1.5',
         letterSpacing: '0.14px',
-        color: '#5c5347',
         textAlign: 'center',
         width: `${w}px`,
         margin: 0,
@@ -77,6 +123,7 @@ function ArchivePhoto({ src, caption, w, h }) {
 
 // ── PAGE ──────────────────────────────────────────────────────────────────────
 export default function CulinaryRepertoire() {
+  const [hoveredCard, setHoveredCard] = useState(null)
   return (
     // Single full-width wrapper — same pattern as essay pages.
     // No fixed 1440px frame; content column centers itself via margin:auto.
@@ -86,20 +133,11 @@ export default function CulinaryRepertoire() {
       position: 'relative',
       width: '100%',
       overflowX: 'hidden',
-      background: 'radial-gradient(ellipse 140% 60% at 50% 0%, #fdfcf9 0%, #faf7f2 100%)',
+      background: PAGE_BG,
     }}>
 
-      {/* ── Papyrus texture — absolute div fills full rendered page height ── */}
-      <div style={{
-        position: 'absolute', top: 0, right: 0, bottom: 0, left: 0,
-        backgroundImage: `url(${papyrusTexture})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center top',
-        mixBlendMode: 'multiply',
-        opacity: 0.25,
-        pointerEvents: 'none',
-        userSelect: 'none',
-      }} />
+      {/* ── Papyrus texture (shared component, viewport-fixed) ── */}
+      <PapyrusTexture />
 
         {/* ── Corner flowers ─────────────────────────────────────────────────── */}
         {/* Flattened SVGs — no CSS transforms, no forced resize, just pixel placement */}
@@ -167,7 +205,7 @@ export default function CulinaryRepertoire() {
       {/*   - 10px   = extra breathing room so button isn't flush to prose   */}
       <Link
         to="/"
-        className="absolute z-20 hover:opacity-60 transition-opacity duration-200"
+        className="absolute z-20"
         style={{
           left: 'calc(50% - 340px - 84px - 10px)',
           top: '150px',
@@ -177,9 +215,8 @@ export default function CulinaryRepertoire() {
         }}
         aria-label="Back to home"
       >
-        {/* Icon-only SVG (opacity 0.4 baked into the asset); the word is interchangeable text */}
         <img src={backButton} alt="" style={{ display: 'block' }} />
-        <span style={{ ...fell, fontSize: '17px', lineHeight: '1.5', letterSpacing: '0.17px', color: '#3d6191', opacity: 0.4 }}>home</span>
+        <span className="text-aegean" style={{ ...fell, fontSize: '16px', lineHeight: '1.5', letterSpacing: '0.17px', opacity: 0.4 }}>home</span>
       </Link>
 
         {/* ── Main content column ────────────────────────────────────────────── */}
@@ -203,12 +240,11 @@ export default function CulinaryRepertoire() {
           {/* Underline spacing = top: '-11.9px' on the absolute div below.        */}
           {/* To move underline closer/farther: adjust that top value.             */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0, flexShrink: 0 }}>
-            <p style={{
+            <p className="text-ink" style={{
               ...cinzel,
               fontSize: '42px',
               lineHeight: '60px',
               letterSpacing: '0.48px',
-              color: '#1c1814',
               textAlign: 'center',
               width: '680px',
               height: '56px',
@@ -248,11 +284,11 @@ export default function CulinaryRepertoire() {
               gap: '12px',
             }}>
               <div style={{ height: '34px', display: 'flex', alignItems: 'center' }}>
-                <p style={{ ...fell, fontSize: '32px', letterSpacing: '0.32px', color: '#2a4a75',  opacity: 0.85, margin: 0, lineHeight: 1 }}>
+                <p className="text-aegean-deep" style={{ ...fell, fontSize: '32px', letterSpacing: '0.32px', opacity: 0.85, margin: 0, lineHeight: 1 }}>
                   Culinary ethos
                 </p>
               </div>
-              <p style={{ ...fell, fontSize: '18px', lineHeight: '1.5', letterSpacing: '0.18px', color: '#1c1814', margin: 0, textAlign: 'center' }}>
+              <p className="text-ink" style={{ ...fell, fontSize: '18px', lineHeight: '1.5', letterSpacing: '0.18px', margin: 0, textAlign: 'center' }}>
                 Taking the flavors everyone loves a little bit further.
               </p>
             </div>
@@ -268,13 +304,11 @@ export default function CulinaryRepertoire() {
 
           <DividerDots />
 
-          {/* ── Elevated comfort food + photo scatter — combined 900px container ── */}
-          {/* Text top aligns with galleryR (the rightmost/topmost photo, top: 0). */}
-          {/* Text left is at 110px = left edge of the 680px content zone.         */}
-          {/* galleryL is at y:223, well below the text block (y:0–~65), no overlap.*/}
-          {/* Total photo width: 900px (4×177 + 1×176 + 4×4px gaps).               */}
-          <div style={{ position: 'relative', width: '900px', height: '446px', flexShrink: 0 }}>
-            {/* Text block — top aligns with galleryR, left aligns with 680px zone */}
+          {/* ── Elevated comfort food + photo staircase — 900px container ── */}
+          {/* Cards: 176×223, 5px gap, 56px vertical step. R at top:0.      */}
+          {/* Text: top:0, left:680 (aligns with R card top-left zone).      */}
+          <div style={{ position: 'relative', width: '900px', height: '447px', flexShrink: 0 }}>
+            {/* Text block */}
             <div style={{
               position: 'absolute',
               top: 0,
@@ -284,34 +318,52 @@ export default function CulinaryRepertoire() {
               gap: '10px',
             }}>
               <div style={{ height: '34px', display: 'flex', alignItems: 'center' }}>
-                <p style={{ ...fell, fontSize: '32px', letterSpacing: '0.32px', color: '#2a4a75', opacity: 0.85, margin: 0, lineHeight: 1, width: '367px' }}>
+                <p className="text-aegean-deep" style={{ ...fell, fontSize: '32px', letterSpacing: '0.32px', opacity: 0.85, margin: 0, lineHeight: 1, width: '367px' }}>
                   Elevated comfort food
                 </p>
               </div>
-              <p style={{ ...fell, fontSize: '18px', lineHeight: '1.5', letterSpacing: '0.18px', color: '#1c1814', margin: 0, width: '230px' }}>
+              <p className="text-ink" style={{ ...fell, fontSize: '18px', lineHeight: '1.5', letterSpacing: '0.18px', margin: 0, width: '230px' }}>
                 Rooted in the familiar. Obsessed with the details.
               </p>
             </div>
-            {/* Photos — diagonal arrangement, total width 900px */}
+            {/* Staircase photos with hover-reveal menus */}
             {[
-              { src: galleryL,  left:   0, top: 223, w: 177, h: 223 },
-              { src: galleryML, left: 181, top: 176, w: 177, h: 223 },
-              { src: galleryM,  left: 362, top: 111, w: 177, h: 224 },
-              { src: galleryMR, left: 543, top:  64, w: 177, h: 224 },
-              { src: galleryR,  left: 724, top:   0, w: 176, h: 223 },
-            ].map(({ src, left, top, w, h }, i) => (
+              { src: galleryL,  hov: hoveredL,  left:   0, top: 224 },
+              { src: galleryML, hov: hoveredML, left: 181, top: 168 },
+              { src: galleryM,  hov: hoveredM,  left: 362, top: 112 },
+              { src: galleryMR, hov: hoveredMR, left: 543, top:  56 },
+              { src: galleryR,  hov: hoveredR,  left: 724, top:   0 },
+            ].map(({ src, hov, left, top }, i) => (
               <div
                 key={i}
+                onMouseEnter={() => setHoveredCard(i)}
+                onMouseLeave={() => setHoveredCard(null)}
                 style={{
                   position: 'absolute',
                   left: `${left}px`,
                   top: `${top}px`,
-                  width: `${w}px`,
-                  height: `${h}px`,
+                  width: '176px',
+                  height: '223px',
                   overflow: 'hidden',
+                  cursor: 'default',
                 }}
               >
                 <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', pointerEvents: 'none' }} />
+                <img
+                  src={hov}
+                  alt=""
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block',
+                    pointerEvents: 'none',
+                    opacity: hoveredCard === i ? 1 : 0,
+                    transition: 'opacity 0.35s ease',
+                  }}
+                />
               </div>
             ))}
           </div>
@@ -360,24 +412,26 @@ export default function CulinaryRepertoire() {
             {/* Heading — centered */}
             <div style={{ flexShrink: 0, paddingTop: '10px', paddingBottom: '10px' }}>
               <div style={{ height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <p style={{ ...fell, fontSize: '32px', letterSpacing: '0.32px', color: '#2a4a75', opacity: 0.85, margin: 0, lineHeight: 1 }}>
+                <p className="text-aegean-deep" style={{ ...fell, fontSize: '32px', letterSpacing: '0.32px', opacity: 0.85, margin: 0, lineHeight: 1 }}>
                   From the archive
                 </p>
               </div>
             </div>
 
             {/* Photos */}
-            <div style={{ width: '680px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '28px', alignItems: 'center' }}>
+            <div style={{ width: '680px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
               {/* Row 1: two landscape photos (232.7 × 174.5) */}
               <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', alignItems: 'flex-start' }}>
-                <ArchivePhoto src={photoWeeknight} caption="weeknight indulgence, for 1" w={232.7} h={174.5} />
-                <ArchivePhoto src={photoSpaghetti} caption="best with a bottle of red"   w={232.7} h={174.5} />
+                {/* Top row — both share speed 70 (stay aligned with each other) */}
+                <ArchivePhoto src={photoWeeknight} caption="weeknight indulgence, for 1" w={232.7} h={174.5} speed={88} />
+                <ArchivePhoto src={photoSpaghetti} caption="best with a bottle of red"   w={232.7} h={174.5} speed={64} />
               </div>
               {/* Row 2: three portrait photos (174.5 × 232.7) */}
               <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', alignItems: 'flex-start' }}>
-                <ArchivePhoto src={photoSupperclub}  caption="supper club"                  w={174.5} h={232.7} />
-                <ArchivePhoto src={photoFranceAsia}  caption="france <> america <> se asia" w={174.5} h={232.7} />
-                <ArchivePhoto src={photoFriendsBday} caption="for a friend's birthday"      w={174.5} h={232.7} />
+                {/* Bottom row — all three share speed 50 (stay aligned; differs from top → parallax) */}
+                <ArchivePhoto src={photoSupperclub}  caption="supper club"                  w={174.5} h={232.7} speed={96} />
+                <ArchivePhoto src={photoFranceAsia}  caption="france <> america <> se asia" w={174.5} h={232.7} speed={88} />
+                <ArchivePhoto src={photoFriendsBday} caption="for a friend's birthday"      w={174.5} h={232.7} speed={104} />
               </div>
             </div>
 
@@ -388,12 +442,11 @@ export default function CulinaryRepertoire() {
           {/* ── Personal Picks heading + underline — wrapped so underline sits   */}
           {/* flush under heading. Spacing = top: '-3px' in the absolute div.    */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0, flexShrink: 0 }}>
-            <p style={{
+            <p className="text-aegean" style={{
               ...fell,
               fontSize: '32px',
               lineHeight: '1.5',
               letterSpacing: '0.32px',
-              color: '#3d6191',
               opacity: 0.85,
               textAlign: 'center',
               margin: 0,
@@ -423,7 +476,7 @@ export default function CulinaryRepertoire() {
           }}>
 
             {/* Labels — left-aligned */}
-            <div style={{
+            <div className="text-ink" style={{
               ...fell,
               display: 'flex',
               flexDirection: 'column',
@@ -432,7 +485,6 @@ export default function CulinaryRepertoire() {
               fontSize: '17px',
               lineHeight: '1.5',
               letterSpacing: '0.17px',
-              color: '#1c1814',
               width: '180px',
               flexShrink: 0,
             }}>
@@ -455,17 +507,19 @@ export default function CulinaryRepertoire() {
                 href="https://www.zwilling.com/us/zwilling-pro-6-inch-chefs-knife-38405-163/38405-163-0.html"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ ...fell, fontSize: '17px', lineHeight: '1.5', letterSpacing: '0.17px', color: '#1c1814', textDecoration: 'underline', textAlign: 'right' }}
+                className="text-ink"
+                style={{ ...fell, fontSize: '17px', lineHeight: '1.5', letterSpacing: '0.17px', textDecoration: 'underline', textAlign: 'right' }}
               >
                 Zwilling Pro, 6 inch
               </a>
               {/* Cutting board — "Boos Block" is linked, "(R-Board)" is plain text */}
-              <p style={{ ...fell, fontSize: '17px', lineHeight: '1.5', letterSpacing: '0.17px', color: '#1c1814', textAlign: 'right', margin: 0 }}>
+              <p className="text-ink" style={{ ...fell, fontSize: '17px', lineHeight: '1.5', letterSpacing: '0.17px', textAlign: 'right', margin: 0 }}>
                 <a
                   href="https://www.johnboos.com/products/maple-cutting-boards-1-1-2-thick-r-board-series?Size=20%22+x+15%22+x+1-1%2F2%22"
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ color: '#1c1814', textDecoration: 'underline' }}
+                  className="text-ink"
+                  style={{ textDecoration: 'underline' }}
                 >
                   Boos Block
                 </a>
@@ -476,12 +530,13 @@ export default function CulinaryRepertoire() {
                 href="https://www.amazon.com/Orgtiv-48Sets-8-Containers-Airtight-Disposable/dp/B09F2FP5QY/ref=sr_1_4_sspa?crid=3JKDG6XU2POX9&dib=eyJ2IjoiMSJ9.72mMcO0yxxKX4MsBiY5hnmysxHoW0FGxy3gFvhh1DENpAP-prLpn5X2S1iC2CBeRibaMCBdEphLK8lFaiLlggS24DUvlgGZO3NN6cescwbt0qKP-d4qel3JdX9K-arAXYu97fTO3Oy01v21nBirlswUMnmLdW-rHNnJ1xfphvS5YD_5eehTkGrVLn6ldK_4FE4WYtLzZMIZy9fLPo6Pk5GAwRj61n2l7YqhCe2wjPA0BcqPwr93BEq1H_G_ZybsGs9Yk9dEYjh0lW7o_on9NLRxxVHShx8Meo4cPcaDdT6oA.7o6KeK36SYKbhrCRMdRPXbhDDONmu4rhVBWbkE0YXrE&dib_tag=se&keywords=deli%2Bcontainers%2Bwith%2Blids&qid=1728509573&sprefix=deli%2Bcont%2Caps%2C128&sr=8-4-spons&sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&th=1"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ ...fell, fontSize: '17px', lineHeight: '1.5', letterSpacing: '0.17px', color: '#1c1814', textDecoration: 'underline', textAlign: 'right' }}
+                className="text-ink"
+                style={{ ...fell, fontSize: '17px', lineHeight: '1.5', letterSpacing: '0.17px', textDecoration: 'underline', textAlign: 'right' }}
               >
                 deli containers
               </a>
               {/* Ingredient */}
-              <p style={{ ...fell, fontSize: '17px', lineHeight: '1.5', letterSpacing: '0.17px', color: '#1c1814', textAlign: 'right', margin: 0 }}>
+              <p className="text-ink" style={{ ...fell, fontSize: '17px', lineHeight: '1.5', letterSpacing: '0.17px', textAlign: 'right', margin: 0 }}>
                 vanilla bean
               </p>
               {/* Restaurant */}
@@ -489,7 +544,8 @@ export default function CulinaryRepertoire() {
                 href="https://www.thursdaykitchen.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ ...fell, fontSize: '17px', lineHeight: '1.5', letterSpacing: '0.17px', color: '#1c1814', textDecoration: 'underline', textAlign: 'right' }}
+                className="text-ink"
+                style={{ ...fell, fontSize: '17px', lineHeight: '1.5', letterSpacing: '0.17px', textDecoration: 'underline', textAlign: 'right' }}
               >
                 Thursday Kitchen
               </a>
@@ -498,7 +554,8 @@ export default function CulinaryRepertoire() {
                 href="https://ladywong.com/?srsltid=AfmBOor6UwLbH-l_9kYibZP5KELZRlBIUDI7rHPIRavVq3Ul8-0nqtFe"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ ...fell, fontSize: '17px', lineHeight: '1.5', letterSpacing: '0.17px', color: '#1c1814', textDecoration: 'underline', textAlign: 'right' }}
+                className="text-ink"
+                style={{ ...fell, fontSize: '17px', lineHeight: '1.5', letterSpacing: '0.17px', textDecoration: 'underline', textAlign: 'right' }}
               >
                 Lady Wong
               </a>

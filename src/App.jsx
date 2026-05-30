@@ -1,64 +1,33 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
 import MainPage from './pages/MainPage'
 import EssayEvolution from './pages/EssayEvolution'
 import EssayCoordination from './pages/EssayCoordination'
 import CulinaryRepertoire from './pages/CulinaryRepertoire'
 
-// ── PAGE TRANSITION WRAPPER ───────────────────────────────────────────────────
-// Wraps each page in a fast fade. 150ms in / 100ms out feels instant but elegant.
-const pageVariants = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1, transition: { duration: 0.15, ease: 'easeOut' } },
-  exit:    { opacity: 0, transition: { duration: 0.10, ease: 'easeIn'  } },
-}
-
-function PageWrapper({ children }) {
-  // No height constraint — main page uses h-screen internally,
-  // essay/culinary pages need to scroll past viewport height.
-  return (
-    <motion.div
-      className="w-full"
-      variants={pageVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-    >
-      {children}
-    </motion.div>
-  )
-}
-
 // ── ANIMATED ROUTES ───────────────────────────────────────────────────────────
-// AnimatePresence needs to detect route changes — useLocation() lives here.
+// Each route mounts with a quick CSS fade-in (.route-fade in index.css). Keying
+// the wrapper on the pathname remounts the subtree on every navigation, so the
+// fade replays. Because all pages share the same parchment background, fading the
+// incoming page IN over that constant wash reads as a clean cross-fade.
+//
+// Why CSS and not a JS animation library: a one-shot opacity fade is exactly what
+// CSS keyframes are for — it's compositor-driven, never depends on a JS tick, and
+// can never leave the page stuck invisible. GSAP is reserved for the genuinely
+// complex choreography (the MainPage name typewriter), where it earns its weight.
 function AnimatedRoutes() {
   const location = useLocation()
-
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-
-        {/* ── Main / Hero page ─────────── */}
-        <Route path="/" element={
-          <PageWrapper><MainPage /></PageWrapper>
-        } />
-
-        {/* ── Essay: The Evolution of Intelligence ── */}
-        <Route path="/essays/evolution" element={
-          <PageWrapper><EssayEvolution /></PageWrapper>
-        } />
-        {/* ── Essay: Solving Human-AI Coordination ── */}
-        <Route path="/essays/coordination" element={
-          <PageWrapper><EssayCoordination /></PageWrapper>
-        } />
-
-        {/* ── Culinary Repertoire ── */}
-        <Route path="/culinary" element={
-          <PageWrapper><CulinaryRepertoire /></PageWrapper>
-        } />
-
+    <div key={location.pathname} className="w-full route-fade">
+      <Routes location={location}>
+        {/* Main / Hero page */}
+        <Route path="/" element={<MainPage />} />
+        {/* Essays */}
+        <Route path="/essays/evolution" element={<EssayEvolution />} />
+        <Route path="/essays/coordination" element={<EssayCoordination />} />
+        {/* Culinary Repertoire */}
+        <Route path="/culinary" element={<CulinaryRepertoire />} />
       </Routes>
-    </AnimatePresence>
+    </div>
   )
 }
 
