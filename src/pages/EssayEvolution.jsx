@@ -346,7 +346,7 @@ export default function EssayEvolution() {
         {/* Title */}
         <h1
           className="font-fraunces text-ink text-center shrink-0"
-          style={{ ...fv, fontSize: '40px', lineHeight: '1.4', letterSpacing: '0.4px', width: '664px', fontWeight: 400 }}
+          style={{ ...fv, fontSize: '36px', lineHeight: '1.4', letterSpacing: '0.4px', width: '664px', fontWeight: 400 }}
         >
           The Evolution of Intelligence
         </h1>
@@ -360,7 +360,9 @@ export default function EssayEvolution() {
 
         {/* Lead paragraph */}
         <p className="font-fraunces text-ink shrink-0 mt-12" style={{ ...body17, ...prose680 }}>
-          The top performers in history weren’t usually the smartest people in the room. They were just early - early to see bottlenecks and early to position themselves where tech was quietly rewriting the rules. This has especially been true since 1970.
+          History's top performers weren't always the smartest people in the room.
+          They were just early - early to see bottlenecks, early to position themselves where tech was rewriting rules, early to compound success.
+          This has especially been true since 1970.
         </p>
 
         {/* Bottlenecks label */}
@@ -381,7 +383,7 @@ export default function EssayEvolution() {
             'early users get attention',
             'usage becomes common',
             "prestige moves up a 'layer'",
-            'new elite performers design/scale on top of the tool',
+            'new elite performer designs/scales on top of the tool',
           ].flatMap((phrase, i, arr) => {
             const els = [<span key={`p${i}`} style={{ color: '#3d6191' }}>{phrase}</span>]
             if (i < arr.length - 1) els.push(<span key={`a${i}`} style={{ color: '#c9a84c' }}> → </span>)
@@ -402,7 +404,7 @@ export default function EssayEvolution() {
 
         {/* Artemis + caption — centered as a unit. Text 289px wide (Figma) forces  */}
         {/* line break at "exemplar". Figure at natural SVG size (31×77px). No italic. */}
-        <div className="flex items-center gap-2 shrink-0 mt-10">
+        <div className="flex items-center shrink-0 mt-10">
           <p className="font-fraunces text-dust mb-0"
             style={{ ...fv, fontSize: '15px', lineHeight: '1.6', letterSpacing: '0.15px', width: '270px' }}>
             Artemis will be our fictional exemplar for these time periods

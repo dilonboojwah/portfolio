@@ -119,7 +119,7 @@ function PillSequence({ pills }) {
           <span key={`p${i}`} style={{
             ...fv,
             fontFamily: 'Fraunces, serif',
-            fontSize: '15px', fontWeight: 400,
+            fontSize: '16px', fontWeight: 400,
             color: '#3d6191',
           }}>
             {pill}
@@ -231,7 +231,7 @@ export default function EssayCoordination() {
         {/* Title */}
         <h1
           className="font-fraunces text-ink text-center shrink-0"
-          style={{ ...fv, fontSize: '40px', lineHeight: '1.4', letterSpacing: '0.4px', width: '664px', fontWeight: 400 }}
+          style={{ ...fv, fontSize: '36px', lineHeight: '1.4', letterSpacing: '0.4px', width: '664px', fontWeight: 400 }}
         >
           Solving Human-AI Coordination
         </h1>
@@ -306,7 +306,7 @@ export default function EssayCoordination() {
             <ul className="list-disc ml-14 font-fraunces" style={body15}>
               <li>Most firms don't have explicit definitions of "good"; they rely on senior people "just knowing" if something feels right</li>
             </ul>
-            <ul className="list-disc ml-4 font-fraunces" style={body15}>
+            <ul className="list-disc ml-14 font-fraunces" style={body15}>
               <li>This leads to non-standardized and inconsistent output, with or without AI</li>
             </ul>
           </div>

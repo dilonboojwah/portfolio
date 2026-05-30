@@ -205,7 +205,7 @@ export default function CulinaryRepertoire() {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0, flexShrink: 0 }}>
             <p style={{
               ...cinzel,
-              fontSize: '48px',
+              fontSize: '42px',
               lineHeight: '60px',
               letterSpacing: '0.48px',
               color: '#1c1814',
