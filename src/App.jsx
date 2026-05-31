@@ -1,8 +1,9 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import MainPage from './pages/MainPage'
 import EssayEvolution from './pages/EssayEvolution'
 import EssayCoordination from './pages/EssayCoordination'
 import CulinaryRepertoire from './pages/CulinaryRepertoire'
+import ComingSoon from './pages/ComingSoon'
 
 // ── ANIMATED ROUTES ───────────────────────────────────────────────────────────
 // Each route mounts with a quick CSS fade-in (.route-fade in index.css). Keying
@@ -22,10 +23,14 @@ function AnimatedRoutes() {
         {/* Main / Hero page */}
         <Route path="/" element={<MainPage />} />
         {/* Essays */}
-        <Route path="/essays/evolution" element={<EssayEvolution />} />
-        <Route path="/essays/coordination" element={<EssayCoordination />} />
+        <Route path="/evolution-of-intelligence" element={<EssayEvolution />} />
+        <Route path="/solving-human-ai-coordination" element={<EssayCoordination />} />
         {/* Culinary Repertoire */}
-        <Route path="/culinary" element={<CulinaryRepertoire />} />
+        <Route path="/culinary-repertoire" element={<CulinaryRepertoire />} />
+        {/* Artemis app — placeholder for now */}
+        <Route path="/artemis" element={<ComingSoon />} />
+        {/* Anything unknown → home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   )

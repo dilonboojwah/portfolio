@@ -30,7 +30,7 @@ const CHAR_OUT_STAGGER = 0.08   // gap between 朱 leaving and 谛 leaving on th
 // ▸ 3. RETURN FADE — plays when the cursor LEAVES the center. This is NOT the
 //      typewriter: the whole name fades in together while drifting forward
 //      (scale-up + blur→sharp), so it reads as coming "from behind".
-const NAME_RETURN_DELAY = 0.3  // pause after the cursor leaves before the name comes back
+const NAME_RETURN_DELAY = 0.4  // pause after the cursor leaves before the name comes back
 const NAME_RETURN_FADE  = 1   // how long the whole-name fade-in takes
 const NAME_RETURN_SCALE = 1   // starting size (smaller = starts further "behind"); grows to 1.0
 
@@ -41,10 +41,18 @@ const WAVE_SPREAD       = 0.5   // diagonal spread: bigger = longer gap between 
 const HOVER_WAVE_SPEED  = 1.15  // overall speed of the wave-IN — bigger = faster (divides both the duration AND the spread)
 const ABOUT_OUT_SPEEDUP = 1.2   // the wave-OUT is this many × faster than the wave-in
 
+// ▸ 5. AMBIENT — falling-petal mix weights (parallel to fallingflower-1..5).
+const TREE_WEIGHTS   = [15, 15, 23, 23, 23]  // tree: petals 1 & 2 rarer (~30% of the mix)
+const FLOWER_WEIGHTS = [0, 0, 1, 1, 1]        // flowers: exclude petals 1 & 2 entirely
+
 // ── LOCAL ASSETS ──────────────────────────────────────────────────────────────
 import PapyrusTexture   from '../components/PapyrusTexture'
+import Clouds           from '../components/Clouds'
+import FallingPetals    from '../components/FallingPetals'
+import { TREE_SPAWN_POINTS, FLOWER_SPAWN_POINTS } from '../data/petalSpawns'
 import blossomTree      from '../assets/illustration/homepage-blossomtree.svg'
 import mountains        from '../assets/illustration/homepage-mountains.svg'
+import mountainsFlowers from '../assets/illustration/homepage-mountains-flowers.svg'
 import patternArtemis   from '../assets/illustration/homepage-pattern-artemis.svg'
 import patternProse     from '../assets/illustration/homepage-pattern-prose.svg'
 import patternCulinary  from '../assets/illustration/homepage-pattern-culinary.svg'
@@ -92,10 +100,10 @@ const CARD_TEXT_H = Math.round(CARD_H * 0.45) // 45% text block / 55% pattern ha
 // gutters, ~164px clearance from the calligraphy, vertical span centered on 450.
 // The cards are the navigation: external for the app, internal routes otherwise.
 const cards = [
-  { label: 'APP',     title: 'Artemis', subtitle: 'career clarity engine',     pattern: patternArtemis,  href: 'https://artemis.com',                external: true,  x: 110,  y: 470 },
-  { label: 'PROSE',   title: 'The Evolution of Intelligence', pattern: patternProse,    href: '/essays/evolution',                  external: false, x: 310,  y: 390 },
-  { label: 'PROSE',   title: 'Solving Human-AI Coordination', pattern: patternProse,    href: '/essays/coordination',               external: false, x: 980,  y: 210 },
-  { label: 'GALLERY', title: 'Culinary Repertoire',           pattern: patternCulinary, href: '/culinary',                          external: false, x: 1180, y: 130 },
+  { label: 'APP',     title: 'Artemis', subtitle: 'career clarity engine',     pattern: patternArtemis,  href: '/artemis',                            external: false, x: 110,  y: 470 },
+  { label: 'PROSE',   title: 'The Evolution of Intelligence', pattern: patternProse,    href: '/evolution-of-intelligence',          external: false, x: 310,  y: 390 },
+  { label: 'PROSE',   title: 'Solving Human-AI Coordination', pattern: patternProse,    href: '/solving-human-ai-coordination',      external: false, x: 980,  y: 210 },
+  { label: 'GALLERY', title: 'Culinary Repertoire',           pattern: patternCulinary, href: '/culinary-repertoire',                external: false, x: 1180, y: 130 },
 ]
 
 function ArtifactCard({ label, title, subtitle, pattern }) {
@@ -103,7 +111,7 @@ function ArtifactCard({ label, title, subtitle, pattern }) {
     <div style={{
       width: `${CARD_W}px`,
       height: `${CARD_H}px`,
-      background: 'rgba(255,255,255,0.65)',
+      background: 'rgba(255,255,255,1)',
       border: '0.5px solid rgba(61,97,145,0.3)',
       display: 'flex',
       flexDirection: 'column',
@@ -267,13 +275,13 @@ export default function MainPage() {
       {/* Papyrus texture — fills the whole viewport */}
       <PapyrusTexture />
 
-      {/* Blossom — tangent to LEFT edge; scales with the scene, distance from top scales too */}
+      {/* Blossom — tangent to LEFT edge; scales with the scene */}
       <img
         src={blossomTree}
         alt=""
         aria-hidden="true"
         className="absolute pointer-events-none select-none"
-        style={{ left: 0, top: `${43 * scale}px`, width: `${283 * scale}px`, height: 'auto', opacity: 0.65 }}
+        style={{ left: 0, top: `${43 * scale}px`, width: `${301 * scale}px`, height: 'auto', opacity: 0.65 }}
       />
 
       {/* Mountains — tangent to RIGHT edge; scales with the scene, distance from bottom scales too */}
@@ -285,9 +293,59 @@ export default function MainPage() {
         style={{ right: 0, bottom: `${23 * scale}px`, width: `${457 * scale}px`, height: 'auto' }}
       />
 
+      {/* Mountain flowers — small cluster flush to the right edge, above the mountains */}
+      <img
+        src={mountainsFlowers}
+        alt=""
+        aria-hidden="true"
+        className="absolute pointer-events-none select-none"
+        style={{ right: `${0.3 * scale}px`, bottom: `${226 * scale}px`, width: `${135.3 * scale}px`, height: 'auto' }}
+      />
+
+      {/* Clouds — drift left in the bottom-right, anchored to the right edge + scaled */}
+      <Clouds scale={scale} />
+
+      {/* Petals from the TREE — spawn across a horizontal plane from the screen's
+          left edge to 50px shy of the tree's right edge, fall down + hard right,
+          capped at the middle container's left edge. zIndex 2 = BEHIND the cards. */}
+      {/* ▸▸ TOP-LEFT knobs:  count = NUMBER of petals,  fall = SPEED (sec/fall, bigger = slower).
+           drift fans out: NEGATIVE values drift LEFT (off screen), POSITIVE drift RIGHT.
+           cap only limits the RIGHT side (the middle-container edge). */}
+      <FallingPetals
+        scale={scale} zIndex={2}
+        count={12}
+        fall={{ min: 18, max: 32 }}
+        fadeIn={0.01}
+        spawnPoints={TREE_SPAWN_POINTS}
+        spawn={{ hAnchor: 'left', vAnchor: 'top' }}
+        drift={{ min: -350, max: 560 }}
+        cap={{ artboardX: 574, side: 'max' }}
+        petalWeights={TREE_WEIGHTS}
+        sway={{ min: 8, max: 18 }}
+      />
+
+      {/* Petals from the MOUNTAIN FLOWERS — petals 1 & 2 excluded; fall + drift
+          aggressively LEFT, capped at x=1155 (~100px past the right-most card's
+          midpoint). zIndex 2 = behind the cards. */}
+      {/* ▸▸ BOTTOM-RIGHT knobs:  count = NUMBER of petals,  fall = SPEED (sec/fall, bigger = slower). */}
+      <FallingPetals
+        scale={scale} zIndex={2}
+        count={8}
+        fall={{ min: 13, max: 23 }}
+        fadeIn={0.01}
+        spawnPoints={FLOWER_SPAWN_POINTS}
+        spawn={{ hAnchor: 'right', vAnchor: 'bottom' }}
+        drift={{ min: -450, max: 80 }}
+        cap={{ artboardX: 1050, side: 'min' }}
+        petalWeights={FLOWER_WEIGHTS}
+        sway={{ min: 6, max: 14 }}
+      />
+
       {/* ── CONTENT LAYER — 1440×900 artboard, centered + uniformly scaled ───── */}
+      {/* zIndex 10 keeps the name + cards ABOVE the ambient petals (z2). */}
       <div style={{
         position: 'absolute',
+        zIndex: 10,
         left: '50%',
         top: '50%',
         width: `${REF_W}px`,
