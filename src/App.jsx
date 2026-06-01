@@ -1,19 +1,43 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import MainPage from './pages/MainPage'   // eager — this is the landing page, keep it instant
 
 // Secondary pages are code-split: their JS (incl. GSAP ScrollTrigger usage) only
-// downloads when the route is actually visited, shrinking the homepage bundle.
-const EssayEvolution = lazy(() => import('./pages/EssayEvolution'))
-const EssayCoordination = lazy(() => import('./pages/EssayCoordination'))
-const CulinaryRepertoire = lazy(() => import('./pages/CulinaryRepertoire'))
-const ComingSoon = lazy(() => import('./pages/ComingSoon'))
+// downloads when the route is visited. We keep the import functions so we can both
+// lazy()-render them AND prefetch them on idle (below).
+const importEvolution    = () => import('./pages/EssayEvolution')
+const importCoordination = () => import('./pages/EssayCoordination')
+const importCulinary     = () => import('./pages/CulinaryRepertoire')
+const importComingSoon   = () => import('./pages/ComingSoon')
+
+const EssayEvolution    = lazy(importEvolution)
+const EssayCoordination = lazy(importCoordination)
+const CulinaryRepertoire = lazy(importCulinary)
+const ComingSoon        = lazy(importComingSoon)
 
 // Fallback shown while a split chunk loads — just the parchment wash, so the swap
 // is seamless (no white flash) on a background every page already shares.
 const RouteFallback = () => (
   <div style={{ width: '100%', minHeight: '100dvh', background: 'var(--rice-paper)' }} />
 )
+
+// ── IDLE PREFETCH ─────────────────────────────────────────────────────────────
+// Once the homepage is interactive and the browser has spare main-thread time,
+// quietly download the other pages' chunks so navigating to them is instant.
+// requestIdleCallback fires during the idle gaps between animation frames (the
+// falling petals never block it); the 3s timeout caps the wait as a guarantee.
+// Re-calling an import() that already resolved is a no-op (the chunk is cached).
+function usePrefetchRoutes() {
+  useEffect(() => {
+    const prefetch = () => { importEvolution(); importCoordination(); importCulinary(); importComingSoon() }
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(prefetch, { timeout: 3000 })
+      return () => window.cancelIdleCallback?.(id)
+    }
+    const t = setTimeout(prefetch, 2000)   // Safari < 16.4 fallback
+    return () => clearTimeout(t)
+  }, [])
+}
 
 // ── ANIMATED ROUTES ───────────────────────────────────────────────────────────
 // Each route mounts with a quick CSS fade-in (.route-fade in index.css). Keying
@@ -45,6 +69,7 @@ function AnimatedRoutes() {
 
 // ── ROOT APP ──────────────────────────────────────────────────────────────────
 export default function App() {
+  usePrefetchRoutes()
   return (
     <BrowserRouter>
       <div className="w-full h-full">
