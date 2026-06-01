@@ -26,6 +26,9 @@ const CHAR_DUR         = 0.5    // how long EACH Chinese character takes to fade
 //      can arrive). Deliberately quicker than the type-in.
 const NAME_OUT_TIME    = 0.175  // spread: total window for the 9 letters to fade back out
 const CHAR_OUT_STAGGER = 0.08   // gap between 朱 leaving and 谛 leaving on the way out
+// ▸ HOVER INTENT — the cursor must linger in the center at least this long (seconds)
+//   before the name⇄bio swap even begins, so a quick glaze across triggers nothing.
+const HOVER_INTENT_DELAY = 0.1
 
 // ▸ 3. RETURN FADE — plays when the cursor LEAVES the center. This is NOT the
 //      typewriter: the whole name fades in together while drifting forward
@@ -184,6 +187,8 @@ export default function MainPage() {
   const scale = useSceneScale()
   const centerRef = useRef(null)   // hover hit-area (scopes the GSAP selectors)
   const retypeRef = useRef(null)   // cancellable timer that retypes the name on mouse-leave
+  const enterTimerRef = useRef(null) // hover-intent timer (fires the swap only after a brief linger)
+  const activeRef = useRef(false)    // whether the name⇄bio swap is currently engaged
 
   // ── Name typewriter ──────────────────────────────────────────────────────────
   // Both groups fire together, so "Dustin Zhu" and 朱谛 start at the same instant.
@@ -248,12 +253,23 @@ export default function MainPage() {
     }
   }
 
-  const handleEnter = () => {
+  // The actual name⇄bio swap — only fired once the cursor has lingered (hover intent).
+  const fireSwap = () => {
+    activeRef.current = true
     retypeRef.current?.kill(); retypeRef.current = null
     typeName(false)   // name types OUT (quick)
     aboutWave(true)   // About waves in
   }
+  const handleEnter = () => {
+    // Don't react immediately — wait out HOVER_INTENT_DELAY. A quick glaze leaves
+    // before this fires, so nothing animates and there's nothing to glitch.
+    enterTimerRef.current?.kill()
+    enterTimerRef.current = gsap.delayedCall(HOVER_INTENT_DELAY, fireSwap)
+  }
   const handleLeave = () => {
+    enterTimerRef.current?.kill(); enterTimerRef.current = null
+    if (!activeRef.current) return   // intent never met → nothing happened, nothing to undo
+    activeRef.current = false
     retypeRef.current?.kill()
     aboutWave(false)  // About waves out (Fix A: in-tweens killed, so nothing blooms after leaving)
     retypeRef.current = gsap.delayedCall(NAME_RETURN_DELAY, () => {
@@ -272,7 +288,7 @@ export default function MainPage() {
   // handling (that's exactly what was skipping the intro + causing the glitches).
   useEffect(() => {
     const ctx = gsap.context(() => { typeName(true, NAME_START_DELAY) }, centerRef)
-    return () => { retypeRef.current?.kill(); ctx.revert() }
+    return () => { enterTimerRef.current?.kill(); retypeRef.current?.kill(); ctx.revert() }
   }, [])
 
   return (
@@ -446,7 +462,7 @@ export default function MainPage() {
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:scale-[1.04] transition-transform duration-200 ease-out"
+              className="card-link"
               style={positioned}
             >
               {card}
@@ -455,7 +471,7 @@ export default function MainPage() {
             <Link
               key={title}
               to={href}
-              className="hover:scale-[1.04] transition-transform duration-200 ease-out"
+              className="card-link"
               style={positioned}
             >
               {card}

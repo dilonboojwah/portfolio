@@ -49,6 +49,12 @@ body {
   --aegean-deep:   #2a4a75;
 }
 
+/* ── ARTIFACT CARD HOVER ─────────────────────────────────── */
+/* Soft expand on hover (the homepage nav cards). The scale value below is the
+   single knob — raise it for a bigger grow (1.06), lower for subtler (1.03). */
+.card-link { transition: transform 200ms ease-out; }
+.card-link:hover { transform: scale(1.04); }
+
 /* ── ROUTE FADE ──────────────────────────────────────────── */
 /* The page-transition fade (see AnimatedRoutes in App.jsx). 150ms ease-out,
    fill-mode `both` so the element holds opacity:1 after it completes. */
