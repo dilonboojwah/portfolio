@@ -211,8 +211,10 @@ export default function MainPage() {
   const nameFadeIn = (delay = 0) => {
     const glyphs = [...gsap.utils.toArray('.name-letter'), ...gsap.utils.toArray('.name-char')]
     const group  = centerRef.current?.querySelector('.name-group')
-    gsap.fromTo(glyphs, { opacity: 0 },
-      { opacity: 1, overwrite: 'auto', delay, duration: NAME_RETURN_FADE, ease: 'power2.out' })
+    // Fade from the glyphs' CURRENT opacity (not a hard reset to 0). On a quick leave
+    // the name may still be mid type-out (partially visible); reversing smoothly from
+    // where it is avoids the snap-to-0 "double flash". Identical for a full hover (already 0).
+    gsap.to(glyphs, { opacity: 1, overwrite: 'auto', delay, duration: NAME_RETURN_FADE, ease: 'power2.out' })
     if (group) {
       gsap.fromTo(group,
         { scale: NAME_RETURN_SCALE, filter: 'blur(6px)' },
@@ -255,10 +257,12 @@ export default function MainPage() {
     retypeRef.current?.kill()
     aboutWave(false)  // About waves out (Fix A: in-tweens killed, so nothing blooms after leaving)
     retypeRef.current = gsap.delayedCall(NAME_RETURN_DELAY, () => {
-      // ▸ FIX B: guarantee the bio is GONE before the name reappears — quickly clear any
-      //   word still lingering, then fade the name in. Keeps the snappy return timing
-      //   (no added delay) while making it impossible for the name to land on stray text.
-      gsap.to(gsap.utils.toArray('.about-word'), { opacity: 0, duration: 0.2, overwrite: 'auto' })
+      // ▸ FIX B: guarantee the bio is GONE before the name reappears. killTweensOf first
+      //   so even the last (bottom-right "in") word — which has the longest stagger delay
+      //   and could otherwise slip through — is stopped, then uniformly fade all to 0.
+      const words = gsap.utils.toArray('.about-word')
+      gsap.killTweensOf(words)
+      gsap.to(words, { opacity: 0, duration: 0.2 })
       nameFadeIn()
     })
   }
