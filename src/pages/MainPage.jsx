@@ -39,7 +39,7 @@ const NAME_RETURN_SCALE = 1   // starting size (smaller = starts further "behind
 const ABOUT_IN_BASE     = 0.55  // base fade duration for each word as it waves in
 const WAVE_SPREAD       = 0.5   // diagonal spread: bigger = longer gap between the first (top-left) and last (bottom-right) word
 const HOVER_WAVE_SPEED  = 1.15  // overall speed of the wave-IN — bigger = faster (divides both the duration AND the spread)
-const ABOUT_OUT_SPEEDUP = 1.2   // the wave-OUT is this many × faster than the wave-in
+const ABOUT_OUT_SPEEDUP = 1.15   // the wave-OUT is this many × faster than the wave-in
 
 // ▸ 5. AMBIENT — falling-petal mix weights (parallel to fallingflower-1..5).
 const TREE_WEIGHTS   = [15, 15, 23, 23, 23]  // tree: petals 1 & 2 rarer (~30% of the mix)

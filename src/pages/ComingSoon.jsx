@@ -33,7 +33,7 @@ export default function ComingSoon() {
           className="font-fraunces hover:opacity-100 transition-opacity duration-200"
           style={{ ...fv, fontSize: '15px', color: '#9a8e7f', opacity: 0.55, marginTop: '26px', letterSpacing: '0.15px' }}
         >
-          ← back home
+          ← home
         </Link>
       </div>
     </div>

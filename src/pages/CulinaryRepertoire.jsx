@@ -226,7 +226,7 @@ export default function CulinaryRepertoire() {
           width: '100%',
           maxWidth: '900px',
           margin: '0 auto',
-          paddingTop: '200px',
+          paddingTop: '170px',
           paddingBottom: '280px',
           paddingLeft: '10px',
           paddingRight: '10px',
