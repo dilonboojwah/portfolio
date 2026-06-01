@@ -30,12 +30,20 @@ const NAME_BLUR    = 6     // px the name blurs by as it dissolves (and clears o
 
 // ▸ HOVER INTENT — the cursor must linger in the center at least this long (seconds)
 //   before the name ⇄ bio swap even begins, so a quick glaze across triggers nothing.
-const HOVER_INTENT_DELAY = 0.15
+//   TWO separate gates:
+//   • HOVER_INTENT_DELAY  — a FRESH hover (name fully at rest in the center).
+//   • REENTER_INTENT_DELAY — re-entering while the name is still UNSETTLED from a recent
+//     leave (i.e. mid wave-out / mid name-return). Raise THIS to kill the "rapid shuffle
+//     back-and-forth" abuse: quick re-entries during that window get ignored entirely.
+const HOVER_INTENT_DELAY   = 0.15
+const REENTER_INTENT_DELAY = 0.25
 
 // ▸ 3. RETURN FADE — plays when the cursor LEAVES the center. This is NOT the
 //      typewriter: the whole name fades in together while drifting forward
-//      (scale-up + blur→sharp), so it reads as coming "from behind".
-const NAME_RETURN_DELAY = 0.4  // pause after the cursor leaves before the name comes back
+//      (scale-up + blur→sharp), so it reads as coming "from behind". Its TIMING is
+//      no longer a fixed guess — it's synced to the bio wave-out (see handleLeave):
+//      the name returns exactly as the wave's last word begins leaving (cross-dissolve),
+//      so it can never appear over the bulk of a still-present bio.
 const NAME_RETURN_FADE  = 1   // how long the whole-name fade-in takes
 const NAME_RETURN_SCALE = 1   // starting size (smaller = starts further "behind"); grows to 1.0
 
@@ -45,6 +53,20 @@ const ABOUT_IN_BASE     = 0.55  // base fade duration for each word as it waves 
 const WAVE_SPREAD       = 0.5   // diagonal spread: bigger = longer gap between the first (top-left) and last (bottom-right) word
 const HOVER_WAVE_SPEED  = 1.15  // overall speed of the wave-IN — bigger = faster (divides both the duration AND the spread)
 const ABOUT_OUT_SPEEDUP = 1.15   // the wave-OUT is this many × faster than the wave-in
+
+// ▸ 4b. CULPRIT-ZONE RECOVERY — the messy glitch came from waving OUT while the bio was
+//      only PARTIALLY waved in (some words frozen mid-opacity). The fix: never sweep out
+//      from a partial state. The "culprit zone" = leaving AFTER the swap commits but
+//      BEFORE the wave-in finishes — i.e. a dwell between HOVER_INTENT_DELAY (lower bound,
+//      ~0.15s) and the wave-in's full completion (upper bound, ABOUT_IN_DUR + spread ≈
+//      0.9s). Both bounds are already governed by the knobs above; this knob governs what
+//      happens INSIDE the zone:
+const HOLD_DURATION    = 0.2   // if you leave mid-wave-in, the bio first COMPLETES its wave-in,
+                               // holds fully-formed this long, THEN sweeps out (0 = no hold, sweep immediately)
+// ▸ NAME RETURN LEAD — how many seconds BEFORE the wave-out finishes the name starts
+//   drifting back (a cross-dissolve). Safe now that every wave-out starts fully-lit.
+//   Bigger = name returns sooner / more overlap with the sweep. 0 = wait for full clear.
+const NAME_RETURN_LEAD = 0.3
 
 // ▸ 5. AMBIENT — falling-petal mix weights (parallel to fallingflower-1..5).
 const TREE_WEIGHTS   = [15, 15, 23, 23, 23]  // tree: petals 1 & 2 rarer (~30% of the mix)
@@ -188,9 +210,12 @@ const aboutParas = [
 export default function MainPage() {
   const scale = useSceneScale()
   const centerRef = useRef(null)   // hover hit-area (scopes the GSAP selectors)
-  const retypeRef = useRef(null)   // cancellable timer that retypes the name on mouse-leave
   const enterTimerRef = useRef(null) // hover-intent timer (fires the swap only after a brief linger)
   const activeRef = useRef(false)    // whether the name⇄bio swap is currently engaged
+  const unsettledRef = useRef(false) // true from a leave until the name has fully returned
+  const exitTlRef = useRef(null)     // the exit timeline: (optional hold →) wave-out → name return
+  const pendingOutRef = useRef(false) // left mid-wave-in → owe a recovery once the wave-in finishes
+  const bioFullyInRef = useRef(false) // whether the wave-in has fully completed (full bio on screen)
 
   // ── Name typewriter (intro only) ─────────────────────────────────────────────
   // Plays on page load / refresh / return-from-route. Both groups fire together:
@@ -238,59 +263,93 @@ export default function MainPage() {
     }
   }
 
-  // ── About diagonal wave — standalone tweens (overwrite keeps toggling clean) ──
+  // ── About diagonal wave ──────────────────────────────────────────────────────
   const ABOUT_IN_DUR = ABOUT_IN_BASE / HOVER_WAVE_SPEED
   const ABOUT_IN_SPREAD = WAVE_SPREAD / HOVER_WAVE_SPEED
-  const aboutWave = (show) => {
+  const ABOUT_OUT_DUR = ABOUT_IN_DUR / ABOUT_OUT_SPEEDUP          // per-word fade-out duration
+  const ABOUT_OUT_STAGGER = ABOUT_IN_SPREAD / ABOUT_OUT_SPEEDUP   // diag(0→1) × this = each word's start
+  const ABOUT_OUT_TOTAL = ABOUT_OUT_STAGGER + ABOUT_OUT_DUR       // wall-clock span of the whole sweep-out
+
+  const diagFns = () => {
     const words = gsap.utils.toArray('.about-word')
-    if (!words.length) return
     const maxDiag = Math.max(...words.map(el => el.offsetLeft + el.offsetTop), 1)
-    const diag = (el) => (el.offsetLeft + el.offsetTop) / maxDiag
-    if (show) {
-      gsap.fromTo(words,
-        { opacity: 0, y: 4, filter: 'blur(3px)' },
-        { opacity: 0.9, y: 0, filter: 'blur(0px)', overwrite: 'auto', duration: ABOUT_IN_DUR, ease: 'power2.out',
-          stagger: (i, el) => diag(el) * ABOUT_IN_SPREAD })
-    } else {
-      // ▸ FIX A: stop every in-progress fade-IN the instant the cursor leaves. Without
-      //   this, the staggered out-delays let some words keep blooming into view AFTER
-      //   you've already left (the stray-text glitch). Now they freeze, then fade down.
-      gsap.killTweensOf(words)
-      // out: faster, SAME diagonal direction as the in (TL→BR), ease-OUT begins at full speed (no lead-in)
-      gsap.to(words,
-        { opacity: 0, y: 4, filter: 'blur(3px)', overwrite: 'auto', duration: ABOUT_IN_DUR / ABOUT_OUT_SPEEDUP, ease: 'power2.out',
-          stagger: (i, el) => diag(el) * ABOUT_IN_SPREAD / ABOUT_OUT_SPEEDUP })
-    }
+    return { words, diag: (el) => (el.offsetLeft + el.offsetTop) / maxDiag }
+  }
+
+  // Wave the bio IN (diagonal TL→BR). onComplete marks the bio fully revealed; if the
+  // cursor has ALREADY left by then (a "culprit-zone" leave), it kicks off the graceful
+  // recovery: hold the fully-formed bio, then sweep it out — never from a partial state.
+  const aboutWaveIn = () => {
+    const { words, diag } = diagFns()
+    if (!words.length) return
+    bioFullyInRef.current = false
+    gsap.fromTo(words,
+      { opacity: 0, y: 4, filter: 'blur(3px)' },
+      { opacity: 0.9, y: 0, filter: 'blur(0px)', overwrite: 'auto', duration: ABOUT_IN_DUR, ease: 'power2.out',
+        stagger: (i, el) => diag(el) * ABOUT_IN_SPREAD,
+        onComplete: () => {
+          bioFullyInRef.current = true
+          if (pendingOutRef.current) {            // left mid-wave-in → now recover from the FULL state
+            pendingOutRef.current = false
+            exitTlRef.current?.kill()
+            exitTlRef.current = buildExitTimeline(true)   // WITH the hold
+          }
+        } })
+  }
+
+  // The shared EXIT: (optional hold →) diagonal sweep-out → name cross-dissolves back in.
+  // Always runs from a fully-lit bio, so the sweep never strands frozen partial words.
+  const buildExitTimeline = (withHold) => {
+    const { words, diag } = diagFns()
+    if (!words.length) { nameFadeIn(); unsettledRef.current = false; return null }
+    const holdT = (withHold && HOLD_DURATION > 0) ? HOLD_DURATION : 0
+    gsap.killTweensOf(words)   // stop the wave-in cleanly; words hold at FULL through holdT
+    const tl = gsap.timeline()
+    // diagonal sweep-OUT, TL→BR (begins after the hold)
+    tl.to(words,
+      { opacity: 0, y: 4, filter: 'blur(3px)', duration: ABOUT_OUT_DUR, ease: 'power2.out',
+        stagger: (i, el) => diag(el) * ABOUT_OUT_STAGGER }, holdT)
+    // name drifts back NAME_RETURN_LEAD before the sweep finishes (cross-dissolve)
+    const nameAt = holdT + Math.max(ABOUT_OUT_TOTAL - NAME_RETURN_LEAD, 0)
+    tl.call(() => nameFadeIn(), null, nameAt)
+    // re-entry window closes once the name has fully returned
+    tl.call(() => { unsettledRef.current = false }, null, nameAt + NAME_RETURN_FADE)
+    return tl
   }
 
   // The actual name⇄bio swap — only fired once the cursor has lingered (hover intent).
   const fireSwap = () => {
     activeRef.current = true
-    retypeRef.current?.kill(); retypeRef.current = null
+    unsettledRef.current = false       // we're engaged again — no longer "returning"
+    pendingOutRef.current = false
+    exitTlRef.current?.kill(); exitTlRef.current = null
     nameDissolve()    // name dissolves OUT (uniform fade + blur)
-    aboutWave(true)   // About waves in
+    aboutWaveIn()     // bio waves in
   }
   const handleEnter = () => {
-    // Don't react immediately — wait out HOVER_INTENT_DELAY. A quick glaze leaves
-    // before this fires, so nothing animates and there's nothing to glitch.
+    // Don't react immediately — wait out the intent delay. A quick glaze leaves before
+    // this fires, so nothing animates. RE-entering while the name is still unsettled from
+    // a recent leave uses the longer REENTER gate, so rapid back-and-forth shuffling is
+    // ignored until the cursor genuinely lingers.
+    const delay = unsettledRef.current ? REENTER_INTENT_DELAY : HOVER_INTENT_DELAY
     enterTimerRef.current?.kill()
-    enterTimerRef.current = gsap.delayedCall(HOVER_INTENT_DELAY, fireSwap)
+    enterTimerRef.current = gsap.delayedCall(delay, fireSwap)
   }
   const handleLeave = () => {
     enterTimerRef.current?.kill(); enterTimerRef.current = null
     if (!activeRef.current) return   // intent never met → nothing happened, nothing to undo
     activeRef.current = false
-    retypeRef.current?.kill()
-    aboutWave(false)  // About waves out (Fix A: in-tweens killed, so nothing blooms after leaving)
-    retypeRef.current = gsap.delayedCall(NAME_RETURN_DELAY, () => {
-      // ▸ FIX B: guarantee the bio is GONE before the name reappears. killTweensOf first
-      //   so even the last (bottom-right "in") word — which has the longest stagger delay
-      //   and could otherwise slip through — is stopped, then uniformly fade all to 0.
-      const words = gsap.utils.toArray('.about-word')
-      gsap.killTweensOf(words)
-      gsap.to(words, { opacity: 0, duration: 0.2 })
-      nameFadeIn()
-    })
+    unsettledRef.current = true      // open the "re-entry" window until the name fully returns
+    exitTlRef.current?.kill()
+    if (bioFullyInRef.current) {
+      // SETTLED hover: bio is fully shown → sweep out + cross-dissolve the name straight away.
+      exitTlRef.current = buildExitTimeline(false)   // no hold
+    } else {
+      // CULPRIT ZONE: left before the wave-in finished. Don't sweep out from a partial,
+      // straggler-prone state — let the wave-in COMPLETE first; its onComplete then runs
+      // buildExitTimeline(true) (hold + sweep). pendingOutRef is the "we owe an exit" flag.
+      pendingOutRef.current = true
+    }
   }
 
   // First visit — type the name in. GSAP pauses/resumes its own ticker with tab
@@ -298,7 +357,7 @@ export default function MainPage() {
   // handling (that's exactly what was skipping the intro + causing the glitches).
   useEffect(() => {
     const ctx = gsap.context(() => { typeName(NAME_START_DELAY) }, centerRef)
-    return () => { enterTimerRef.current?.kill(); retypeRef.current?.kill(); ctx.revert() }
+    return () => { enterTimerRef.current?.kill(); exitTlRef.current?.kill(); ctx.revert() }
   }, [])
 
   return (
