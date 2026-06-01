@@ -61,8 +61,9 @@ const ABOUT_OUT_SPEEDUP = 1.15   // the wave-OUT is this many × faster than the
 //      ~0.15s) and the wave-in's full completion (upper bound, ABOUT_IN_DUR + spread ≈
 //      0.9s). Both bounds are already governed by the knobs above; this knob governs what
 //      happens INSIDE the zone:
-const HOLD_DURATION    = 0.2   // if you leave mid-wave-in, the bio first COMPLETES its wave-in,
-                               // holds fully-formed this long, THEN sweeps out (0 = no hold, sweep immediately)
+const HOLD_DURATION    = 0   // if you leave mid-wave-in, the bio first COMPLETES its wave-in,
+                            // holds fully-formed this long, THEN sweeps out (0 = no hold, sweep immediately)
+
 // ▸ NAME RETURN LEAD — how many seconds BEFORE the wave-out finishes the name starts
 //   drifting back (a cross-dissolve). Safe now that every wave-out starts fully-lit.
 //   Bigger = name returns sooner / more overlap with the sweep. 0 = wait for full clear.
@@ -92,11 +93,14 @@ import patternCulinary  from '../assets/illustration/homepage-pattern-culinary.s
 //   • AMBIENT layer (papyrus, blossom, mountains) is anchored to the real
 //     viewport edges and scaled by the same factor, so blossom stays tangent
 //     to the LEFT edge and mountains to the RIGHT edge at any size.
-// scale = min(vw/1440, vh/900), capped at 1.1 so it never balloons on large
-// monitors (scaling down is safe; uncapped scale-up looks blown-up).
+// scale = min(vw/1440, vh/900), capped so it never balloons on large monitors
+// (scaling down is safe; uncapped scale-up looks blown-up). The cap is deliberately
+// EDITORIAL: at 1.3 a 1920×1080 monitor fills comfortably (it "wants" 1.2) while
+// huge 2K/4K screens stop here and frame the composition with airy parchment margins
+// rather than zooming everything up — the intended premium, gallery-like feel.
 const REF_W = 1440
 const REF_H = 900
-const MAX_SCALE = 1.1
+const MAX_SCALE = 1.3
 
 function computeScale() {
   if (typeof window === 'undefined') return 1
@@ -204,7 +208,7 @@ function ArtifactCard({ label, title, subtitle, pattern }) {
 // Center hover reveal — contents of the hidden "Main Page About Text" box (Figma 223:1987)
 const aboutParas = [
   'I grew up in upstate New York and have lived in NYC and SF. My work sits at the intersection of design and technology.',
-  'My favorite food is Nutella and I wish to live in Norway one day.',
+  'I have a soft spot for Nutella and a dream of living in Norway one day.',
 ]
 
 export default function MainPage() {

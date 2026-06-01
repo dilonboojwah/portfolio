@@ -41,9 +41,16 @@ function usePrefetchRoutes() {
 }
 
 // ── MOBILE DETECTION ──────────────────────────────────────────────────────────
-// The desktop layout needs room (the essays use a fixed 900px column), so below
-// this width we show the mobile "best viewed on desktop" placeholder instead.
-const MOBILE_BREAKPOINT = 1000   // px — narrower than this → mobile placeholder
+// We cut over to the placeholder when the homepage's scale-to-fit would drop below a
+// legibility floor. The homepage is authored against a 1440-wide artboard and scaled
+// by min(vw/1440, vh/900); MIN_LEGIBLE_SCALE is the smallest that still reads as a
+// premium composition. Because the essays scroll vertically (fluid maxWidth column),
+// only WIDTH truly governs usability, so we express the floor as the width at which
+// the homepage hits that scale: 1440 × 0.62 ≈ 893px.
+//   • ½ of a 1920 monitor = 960px → stays DESKTOP (legible, navigable).
+//   • ½ of a 1440 laptop  = 720px → placeholder (too cramped for the landscape art).
+const MIN_LEGIBLE_SCALE = 0.62
+const MOBILE_BREAKPOINT = Math.round(1440 * MIN_LEGIBLE_SCALE)   // ≈ 893px
 function useIsMobile() {
   const read = () => typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT
   const [mobile, setMobile] = useState(read)

@@ -33,8 +33,18 @@ function computeScale() {
   return Math.min(window.innerWidth / FRAME_W, window.innerHeight / FRAME_H, MAX_SCALE)
 }
 
+// Is this an actual computer vs a phone/tablet? Size alone can't tell — a snapped
+// desktop window is narrow too. Pointer type can: any precise pointer (mouse/trackpad)
+// means a computer (even a touchscreen laptop), while phones/tablets only have a
+// coarse pointer. Drives the placeholder's call-to-action (maximize vs visit on desktop).
+function isComputer() {
+  if (typeof window === 'undefined' || !window.matchMedia) return true
+  return window.matchMedia('(any-pointer: fine)').matches
+}
+
 export default function MobilePage() {
   const [scale, setScale] = useState(computeScale)
+  const [onComputer] = useState(isComputer)
   useEffect(() => {
     const onResize = () => setScale(computeScale())
     window.addEventListener('resize', onResize)
@@ -61,7 +71,7 @@ export default function MobilePage() {
             Crafted for a bigger canvas
           </p>
           <p className="font-fraunces" style={{ ...fv, margin: '16px 0 0', fontSize: '17px', fontWeight: 600, lineHeight: 1.3, color: '#9a8e7f' }}>
-            Visit on desktop for the full experience
+            {onComputer ? 'Maximize your window for the full experience' : 'Visit on desktop for the full experience'}
           </p>
         </div>
 
