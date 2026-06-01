@@ -17,9 +17,8 @@ html, body, #root {
   min-height: 100%;
   margin: 0;
   padding: 0;
-  /* Desktop-only layout — min width enforces the design at full fidelity.
-     Mobile breakpoint will be added in a later phase. */
-  min-width: 1280px;
+  /* No min-width: narrow viewports now show the mobile placeholder (App.jsx)
+     instead of being forced to the desktop width. */
 }
 
 body {
