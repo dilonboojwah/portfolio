@@ -235,6 +235,10 @@ export default function MainPage() {
         { opacity: 0.9, y: 0, filter: 'blur(0px)', overwrite: 'auto', duration: ABOUT_IN_DUR, ease: 'power2.out',
           stagger: (i, el) => diag(el) * ABOUT_IN_SPREAD })
     } else {
+      // ▸ FIX A: stop every in-progress fade-IN the instant the cursor leaves. Without
+      //   this, the staggered out-delays let some words keep blooming into view AFTER
+      //   you've already left (the stray-text glitch). Now they freeze, then fade down.
+      gsap.killTweensOf(words)
       // out: faster, SAME diagonal direction as the in (TL→BR), ease-OUT begins at full speed (no lead-in)
       gsap.to(words,
         { opacity: 0, y: 4, filter: 'blur(3px)', overwrite: 'auto', duration: ABOUT_IN_DUR / ABOUT_OUT_SPEEDUP, ease: 'power2.out',
@@ -249,8 +253,14 @@ export default function MainPage() {
   }
   const handleLeave = () => {
     retypeRef.current?.kill()
-    aboutWave(false)  // About waves out
-    retypeRef.current = gsap.delayedCall(NAME_RETURN_DELAY, () => nameFadeIn()) // then the name fades back in (unified)
+    aboutWave(false)  // About waves out (Fix A: in-tweens killed, so nothing blooms after leaving)
+    retypeRef.current = gsap.delayedCall(NAME_RETURN_DELAY, () => {
+      // ▸ FIX B: guarantee the bio is GONE before the name reappears — quickly clear any
+      //   word still lingering, then fade the name in. Keeps the snappy return timing
+      //   (no added delay) while making it impossible for the name to land on stray text.
+      gsap.to(gsap.utils.toArray('.about-word'), { opacity: 0, duration: 0.2, overwrite: 'auto' })
+      nameFadeIn()
+    })
   }
 
   // First visit — type the name in. GSAP pauses/resumes its own ticker with tab
@@ -432,7 +442,7 @@ export default function MainPage() {
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:opacity-80 transition-opacity duration-200"
+              className="hover:scale-[1.04] transition-transform duration-200 ease-out"
               style={positioned}
             >
               {card}
@@ -441,7 +451,7 @@ export default function MainPage() {
             <Link
               key={title}
               to={href}
-              className="hover:opacity-80 transition-opacity duration-200"
+              className="hover:scale-[1.04] transition-transform duration-200 ease-out"
               style={positioned}
             >
               {card}
