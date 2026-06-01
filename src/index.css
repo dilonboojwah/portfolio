@@ -53,7 +53,7 @@ body {
 /* Soft expand on hover (the homepage nav cards). The scale value below is the
    single knob — raise it for a bigger grow (1.06), lower for subtler (1.03). */
 .card-link { transition: transform 200ms ease-out; }
-.card-link:hover { transform: scale(1.04); }
+.card-link:hover { transform: scale(1.02); }
 
 /* ── ROUTE FADE ──────────────────────────────────────────── */
 /* The page-transition fade (see AnimatedRoutes in App.jsx). 150ms ease-out,

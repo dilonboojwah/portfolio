@@ -22,13 +22,15 @@ const ZHU_IN           = 0.125  // entrance time of 朱 — seconds after the na
 const DI_IN            = 0.3    // entrance time of 谛 — seconds after the name sequence starts
 const CHAR_DUR         = 0.5    // how long EACH Chinese character takes to fade (also reused on type-out)
 
-// ▸ 2. TYPE-OUT — plays when the cursor ENTERS the center (name leaves so the bio
-//      can arrive). Deliberately quicker than the type-in.
-const NAME_OUT_TIME    = 0.175  // spread: total window for the 9 letters to fade back out
-const CHAR_OUT_STAGGER = 0.08   // gap between 朱 leaving and 谛 leaving on the way out
+// ▸ 2. HOVER DISSOLVE — plays when the cursor ENTERS the center (name leaves so the
+//      bio arrives). UNIFORM: the whole name fades + blurs out together (no per-letter
+//      stagger), so the return can later reverse smoothly from any in-between state.
+const NAME_OUT_DUR = 0.4   // seconds for the whole name to dissolve out
+const NAME_BLUR    = 6     // px the name blurs by as it dissolves (and clears on the way back)
+
 // ▸ HOVER INTENT — the cursor must linger in the center at least this long (seconds)
-//   before the name⇄bio swap even begins, so a quick glaze across triggers nothing.
-const HOVER_INTENT_DELAY = 0.1
+//   before the name ⇄ bio swap even begins, so a quick glaze across triggers nothing.
+const HOVER_INTENT_DELAY = 0.15
 
 // ▸ 3. RETURN FADE — plays when the cursor LEAVES the center. This is NOT the
 //      typewriter: the whole name fades in together while drifting forward
@@ -179,8 +181,8 @@ function ArtifactCard({ label, title, subtitle, pattern }) {
 
 // Center hover reveal — contents of the hidden "Main Page About Text" box (Figma 223:1987)
 const aboutParas = [
-  'This portfolio represents an intersection of design <> technology.',
-  'I grew up in upstate New York and have lived in NYC and SF. My favorite food is Nutella and I wish to live in Norway one day.',
+  'I grew up in upstate New York and have lived in NYC and SF. My work sits at the intersection of design and technology.',
+  'My favorite food is Nutella and I wish to live in Norway one day.',
 ]
 
 export default function MainPage() {
@@ -190,21 +192,29 @@ export default function MainPage() {
   const enterTimerRef = useRef(null) // hover-intent timer (fires the swap only after a brief linger)
   const activeRef = useRef(false)    // whether the name⇄bio swap is currently engaged
 
-  // ── Name typewriter ──────────────────────────────────────────────────────────
-  // Both groups fire together, so "Dustin Zhu" and 朱谛 start at the same instant.
-  // Letters type IN over NAME_TYPE_TIME; 朱 and 谛 each enter at their own time (ZHU_IN / DI_IN).
-  // type-OUT (on hover) is quicker. Standalone tweens with overwrite:'auto' so rapid
-  // hover toggling just redirects — no stacking.
-  const typeName = (show, delay = 0) => {
+  // ── Name typewriter (intro only) ─────────────────────────────────────────────
+  // Plays on page load / refresh / return-from-route. Both groups fire together:
+  // "Dustin Zhu" types IN over NAME_TYPE_TIME; 朱 and 谛 each enter at ZHU_IN / DI_IN.
+  // (The hover-OUT is a uniform dissolve now — see nameDissolve — not a typewriter.)
+  const typeName = (delay = 0) => {
     const letters = gsap.utils.toArray('.name-letter')
     const chars   = gsap.utils.toArray('.name-char')
     const base = { ease: 'none', overwrite: 'auto', delay }   // delay = wait before this run starts
-    if (show) {
-      gsap.fromTo(letters, { opacity: 0 }, { opacity: 1, ...base, duration: LETTER_DUR, stagger: { amount: NAME_TYPE_TIME } })
-      gsap.fromTo(chars,   { opacity: 0 }, { opacity: 1, ...base, duration: CHAR_DUR, stagger: (i) => (i === 0 ? ZHU_IN : DI_IN) })
-    } else {
-      gsap.to(letters, { opacity: 0, ...base, duration: LETTER_DUR, stagger: { amount: NAME_OUT_TIME } })
-      gsap.to(chars,   { opacity: 0, ...base, duration: CHAR_DUR, stagger: { amount: CHAR_OUT_STAGGER } })
+    gsap.fromTo(letters, { opacity: 0 }, { opacity: 1, ...base, duration: LETTER_DUR, stagger: { amount: NAME_TYPE_TIME } })
+    gsap.fromTo(chars,   { opacity: 0 }, { opacity: 1, ...base, duration: CHAR_DUR, stagger: (i) => (i === 0 ? ZHU_IN : DI_IN) })
+  }
+
+  // ── Name dissolve (hover) ────────────────────────────────────────────────────
+  // The whole name fades + blurs out TOGETHER (uniform, no stagger). Keeping it
+  // uniform is the fix: the name is always at a single opacity/blur, so the return
+  // can reverse cleanly from any point — no caught-mid-stagger flash or unevenness.
+  const nameDissolve = () => {
+    const glyphs = [...gsap.utils.toArray('.name-letter'), ...gsap.utils.toArray('.name-char')]
+    const group  = centerRef.current?.querySelector('.name-group')
+    gsap.to(glyphs, { opacity: 0, overwrite: 'auto', duration: NAME_OUT_DUR, ease: 'power2.out' })
+    if (group) {
+      gsap.to(group, { scale: NAME_RETURN_SCALE, filter: `blur(${NAME_BLUR}px)`, transformOrigin: 'center center',
+        overwrite: 'auto', duration: NAME_OUT_DUR, ease: 'power2.out' })
     }
   }
 
@@ -221,10 +231,10 @@ export default function MainPage() {
     // where it is avoids the snap-to-0 "double flash". Identical for a full hover (already 0).
     gsap.to(glyphs, { opacity: 1, overwrite: 'auto', delay, duration: NAME_RETURN_FADE, ease: 'power2.out' })
     if (group) {
-      gsap.fromTo(group,
-        { scale: NAME_RETURN_SCALE, filter: 'blur(6px)' },
-        { scale: 1, filter: 'blur(0px)', transformOrigin: 'center center',
-          overwrite: 'auto', delay, duration: NAME_RETURN_FADE, ease: 'power2.out' })
+      // Clear scale/blur from the group's CURRENT state (set by the dissolve) — a
+      // gsap.to, NOT a fromTo, so the blur never snaps. Symmetric with the dissolve.
+      gsap.to(group, { scale: 1, filter: 'blur(0px)', transformOrigin: 'center center',
+        overwrite: 'auto', delay, duration: NAME_RETURN_FADE, ease: 'power2.out' })
     }
   }
 
@@ -257,7 +267,7 @@ export default function MainPage() {
   const fireSwap = () => {
     activeRef.current = true
     retypeRef.current?.kill(); retypeRef.current = null
-    typeName(false)   // name types OUT (quick)
+    nameDissolve()    // name dissolves OUT (uniform fade + blur)
     aboutWave(true)   // About waves in
   }
   const handleEnter = () => {
@@ -287,7 +297,7 @@ export default function MainPage() {
   // visibility, so a hidden/refocused tab resumes cleanly. No manual visibility
   // handling (that's exactly what was skipping the intro + causing the glitches).
   useEffect(() => {
-    const ctx = gsap.context(() => { typeName(true, NAME_START_DELAY) }, centerRef)
+    const ctx = gsap.context(() => { typeName(NAME_START_DELAY) }, centerRef)
     return () => { enterTimerRef.current?.kill(); retypeRef.current?.kill(); ctx.revert() }
   }, [])
 
