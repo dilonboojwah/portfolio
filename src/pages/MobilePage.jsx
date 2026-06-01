@@ -25,8 +25,8 @@ const BG = '#fdf9f5'   // airy-white (matches the Figma frame)
 //     the text stays fixed (sky grows upward, mountains grow downward).
 //   • SKY.bottom / MOUNTAINS.top = px from the artboard's top edge — these set the
 //     distance to the text (smaller gap = move them closer to the text).
-const SKY       = { width: 308, bottom: 299 }   // top illustration — bottom edge sits at y=299
-const MOUNTAINS = { width: 308, top: 554 }       // bottom illustration — top edge sits at y=554
+const SKY       = { width: 308, bottom: 281 }   // top illustration — bottom edge sits at y=299
+const MOUNTAINS = { width: 308, top: 570 }       // bottom illustration — top edge sits at y=554
 
 function computeScale() {
   if (typeof window === 'undefined') return 1
@@ -60,7 +60,7 @@ export default function MobilePage() {
           <p className="font-fraunces" style={{ ...fv, margin: 0, fontSize: '24px', fontWeight: 700, lineHeight: 1.25, color: '#5c5347' }}>
             Crafted for a bigger canvas
           </p>
-          <p className="font-fraunces" style={{ ...fv, margin: '16px 0 0', fontSize: '20px', fontWeight: 600, lineHeight: 1.3, color: '#9a8e7f' }}>
+          <p className="font-fraunces" style={{ ...fv, margin: '16px 0 0', fontSize: '17px', fontWeight: 600, lineHeight: 1.3, color: '#9a8e7f' }}>
             Visit on desktop for the full experience
           </p>
         </div>
