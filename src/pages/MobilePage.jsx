@@ -18,11 +18,15 @@ const MAX_SCALE = 1.2
 const BG = '#fdf9f5'   // airy-white (matches the Figma frame)
 
 // ── POSITION KNOBS (edit these) ───────────────────────────────────────────────
-// Coordinates are inside the 390×844 artboard: x = px from the LEFT edge, y = px
-// from the TOP edge, width = px (height scales automatically from the SVG's own
-// aspect ratio). Bigger y = lower on screen; bigger x = further right.
-const SKY       = { x: 55, y: 119, width: 280 }   // sun + name + clouds + crane (top)
-const MOUNTAINS = { x: 55, y: 554, width: 280 }   // bottom scenery
+// Both illustrations are centered horizontally and anchored by the edge NEAREST
+// the center text. So:
+//   • `width` = on-screen size in px (height scales from the SVG's aspect). Grow
+//     this to scale the art up — it expands toward the SCREEN EDGE, so the gap to
+//     the text stays fixed (sky grows upward, mountains grow downward).
+//   • SKY.bottom / MOUNTAINS.top = px from the artboard's top edge — these set the
+//     distance to the text (smaller gap = move them closer to the text).
+const SKY       = { width: 308, bottom: 299 }   // top illustration — bottom edge sits at y=299
+const MOUNTAINS = { width: 308, top: 554 }       // bottom illustration — top edge sits at y=554
 
 function computeScale() {
   if (typeof window === 'undefined') return 1
@@ -45,24 +49,26 @@ export default function MobilePage() {
         transform: `translate(-50%, -50%) scale(${scale})`,
         transformOrigin: 'center center',
       }}>
-        {/* Sky illustration (sun + name + clouds + crane) */}
+        {/* Sky illustration — centered, anchored by its BOTTOM edge (grows upward) */}
         <img src={mobileSky} alt="" aria-hidden="true" style={{
-          position: 'absolute', left: `${SKY.x}px`, top: `${SKY.y}px`, width: `${SKY.width}px`, height: 'auto', display: 'block',
+          position: 'absolute', left: '50%', top: `${SKY.bottom}px`, width: `${SKY.width}px`, height: 'auto',
+          transform: 'translate(-50%, -100%)', display: 'block',
         }} />
 
         {/* Center message */}
         <div style={{ position: 'absolute', left: '96px', top: '366px', width: '198px', textAlign: 'center', opacity: 0.9 }}>
-          <p className="font-fraunces" style={{ ...fv, margin: 0, fontSize: '22px', fontWeight: 700, lineHeight: 1.25, color: '#5c5347' }}>
+          <p className="font-fraunces" style={{ ...fv, margin: 0, fontSize: '24px', fontWeight: 700, lineHeight: 1.25, color: '#5c5347' }}>
             Crafted for a bigger canvas
           </p>
-          <p className="font-fraunces" style={{ ...fv, margin: '14px 0 0', fontSize: '17px', fontWeight: 600, lineHeight: 1.3, color: '#9a8e7f' }}>
+          <p className="font-fraunces" style={{ ...fv, margin: '16px 0 0', fontSize: '20px', fontWeight: 600, lineHeight: 1.3, color: '#9a8e7f' }}>
             Visit on desktop for the full experience
           </p>
         </div>
 
-        {/* Mountains illustration (Figma position) */}
+        {/* Mountains illustration — centered, anchored by its TOP edge (grows downward) */}
         <img src={mobileMountains} alt="" aria-hidden="true" style={{
-          position: 'absolute', left: `${MOUNTAINS.x}px`, top: `${MOUNTAINS.y}px`, width: `${MOUNTAINS.width}px`, height: 'auto', display: 'block',
+          position: 'absolute', left: '50%', top: `${MOUNTAINS.top}px`, width: `${MOUNTAINS.width}px`, height: 'auto',
+          transform: 'translateX(-50%)', display: 'block',
         }} />
       </div>
     </div>
