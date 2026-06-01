@@ -1,37 +1,44 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import MainPage from './pages/MainPage'
-import EssayEvolution from './pages/EssayEvolution'
-import EssayCoordination from './pages/EssayCoordination'
-import CulinaryRepertoire from './pages/CulinaryRepertoire'
-import ComingSoon from './pages/ComingSoon'
+import { Suspense, lazy } from 'react'
+import MainPage from './pages/MainPage'   // eager — this is the landing page, keep it instant
+
+// Secondary pages are code-split: their JS (incl. GSAP ScrollTrigger usage) only
+// downloads when the route is actually visited, shrinking the homepage bundle.
+const EssayEvolution = lazy(() => import('./pages/EssayEvolution'))
+const EssayCoordination = lazy(() => import('./pages/EssayCoordination'))
+const CulinaryRepertoire = lazy(() => import('./pages/CulinaryRepertoire'))
+const ComingSoon = lazy(() => import('./pages/ComingSoon'))
+
+// Fallback shown while a split chunk loads — just the parchment wash, so the swap
+// is seamless (no white flash) on a background every page already shares.
+const RouteFallback = () => (
+  <div style={{ width: '100%', minHeight: '100dvh', background: 'var(--rice-paper)' }} />
+)
 
 // ── ANIMATED ROUTES ───────────────────────────────────────────────────────────
 // Each route mounts with a quick CSS fade-in (.route-fade in index.css). Keying
 // the wrapper on the pathname remounts the subtree on every navigation, so the
 // fade replays. Because all pages share the same parchment background, fading the
 // incoming page IN over that constant wash reads as a clean cross-fade.
-//
-// Why CSS and not a JS animation library: a one-shot opacity fade is exactly what
-// CSS keyframes are for — it's compositor-driven, never depends on a JS tick, and
-// can never leave the page stuck invisible. GSAP is reserved for the genuinely
-// complex choreography (the MainPage name typewriter), where it earns its weight.
 function AnimatedRoutes() {
   const location = useLocation()
   return (
     <div key={location.pathname} className="w-full route-fade">
-      <Routes location={location}>
-        {/* Main / Hero page */}
-        <Route path="/" element={<MainPage />} />
-        {/* Essays */}
-        <Route path="/evolution-of-intelligence" element={<EssayEvolution />} />
-        <Route path="/solving-human-ai-coordination" element={<EssayCoordination />} />
-        {/* Culinary Repertoire */}
-        <Route path="/culinary-repertoire" element={<CulinaryRepertoire />} />
-        {/* Artemis app — placeholder for now */}
-        <Route path="/artemis" element={<ComingSoon />} />
-        {/* Anything unknown → home */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <Suspense fallback={<RouteFallback />}>
+        <Routes location={location}>
+          {/* Main / Hero page */}
+          <Route path="/" element={<MainPage />} />
+          {/* Essays */}
+          <Route path="/evolution-of-intelligence" element={<EssayEvolution />} />
+          <Route path="/solving-human-ai-coordination" element={<EssayCoordination />} />
+          {/* Culinary Repertoire */}
+          <Route path="/culinary-repertoire" element={<CulinaryRepertoire />} />
+          {/* Artemis app — placeholder for now */}
+          <Route path="/artemis" element={<ComingSoon />} />
+          {/* Anything unknown → home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
     </div>
   )
 }
