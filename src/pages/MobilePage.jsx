@@ -17,6 +17,13 @@ const FRAME_H = 844
 const MAX_SCALE = 1.2
 const BG = '#fdf9f5'   // airy-white (matches the Figma frame)
 
+// ── POSITION KNOBS (edit these) ───────────────────────────────────────────────
+// Coordinates are inside the 390×844 artboard: x = px from the LEFT edge, y = px
+// from the TOP edge, width = px (height scales automatically from the SVG's own
+// aspect ratio). Bigger y = lower on screen; bigger x = further right.
+const SKY       = { x: 55, y: 119, width: 280 }   // sun + name + clouds + crane (top)
+const MOUNTAINS = { x: 55, y: 554, width: 280 }   // bottom scenery
+
 function computeScale() {
   if (typeof window === 'undefined') return 1
   return Math.min(window.innerWidth / FRAME_W, window.innerHeight / FRAME_H, MAX_SCALE)
@@ -40,7 +47,7 @@ export default function MobilePage() {
       }}>
         {/* Sky illustration (sun + name + clouds + crane) */}
         <img src={mobileSky} alt="" aria-hidden="true" style={{
-          position: 'absolute', left: '55px', top: '119px', width: '280px', height: 'auto', display: 'block',
+          position: 'absolute', left: `${SKY.x}px`, top: `${SKY.y}px`, width: `${SKY.width}px`, height: 'auto', display: 'block',
         }} />
 
         {/* Center message */}
@@ -55,7 +62,7 @@ export default function MobilePage() {
 
         {/* Mountains illustration (Figma position) */}
         <img src={mobileMountains} alt="" aria-hidden="true" style={{
-          position: 'absolute', left: '55px', top: '554px', width: '280px', height: 'auto', display: 'block',
+          position: 'absolute', left: `${MOUNTAINS.x}px`, top: `${MOUNTAINS.y}px`, width: `${MOUNTAINS.width}px`, height: 'auto', display: 'block',
         }} />
       </div>
     </div>
