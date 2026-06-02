@@ -16,7 +16,7 @@ import { introState } from '../lib/introState'
 // ▸ 1. INITIAL TYPEWRITER — plays on first load, on refresh, and when you come
 //      back to the page from an artifact. "Dustin Zhu" types in letter-by-letter,
 //      then 朱 and 谛 each pop in at their own moment.
-const NAME_START_DELAY = 0.66    // pause after the page loads before the name starts appearing
+const NAME_START_DELAY = 0.65    // pause after the page loads before the name starts appearing
 const NAME_TYPE_TIME   = 0.6    // spread: total window for all 9 English letters to start typing in
 const LETTER_DUR       = 0.3    // how long EACH English letter takes to fade in (also reused on type-out)
 const ZHU_IN           = 0.25  // entrance time of 朱 — seconds after the name sequence starts
