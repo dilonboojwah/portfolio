@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import gsap from 'gsap'
 import { fv, PAGE_BG } from '../lib/theme'
+import { introState } from '../lib/introState'
 
 // ── ANIMATION KNOBS ──────────────────────────────────────────────────────────
 // Every value below is in SECONDS. Rule of thumb: BIGGER = slower / more spread
@@ -15,12 +16,12 @@ import { fv, PAGE_BG } from '../lib/theme'
 // ▸ 1. INITIAL TYPEWRITER — plays on first load, on refresh, and when you come
 //      back to the page from an artifact. "Dustin Zhu" types in letter-by-letter,
 //      then 朱 and 谛 each pop in at their own moment.
-const NAME_START_DELAY = 0.4    // pause after the page loads before the name starts appearing
-const NAME_TYPE_TIME   = 0.5    // spread: total window for all 9 English letters to start typing in
+const NAME_START_DELAY = 0.66    // pause after the page loads before the name starts appearing
+const NAME_TYPE_TIME   = 0.6    // spread: total window for all 9 English letters to start typing in
 const LETTER_DUR       = 0.3    // how long EACH English letter takes to fade in (also reused on type-out)
-const ZHU_IN           = 0.125  // entrance time of 朱 — seconds after the name sequence starts
-const DI_IN            = 0.3    // entrance time of 谛 — seconds after the name sequence starts
-const CHAR_DUR         = 0.5    // how long EACH Chinese character takes to fade (also reused on type-out)
+const ZHU_IN           = 0.25  // entrance time of 朱 — seconds after the name sequence starts
+const DI_IN            = 0.4    // entrance time of 谛 — seconds after the name sequence starts
+const CHAR_DUR         = 0.6    // how long EACH Chinese character takes to fade (also reused on type-out)
 
 // ▸ 2. HOVER DISSOLVE — plays when the cursor ENTERS the center (name leaves so the
 //      bio arrives). UNIFORM: the whole name fades + blurs out together (no per-letter
@@ -213,6 +214,11 @@ const aboutParas = [
 
 export default function MainPage() {
   const scale = useSceneScale()
+  // On a RETURN to the homepage the typewriter is skipped — so render the name glyphs
+  // already-visible from the FIRST painted frame (not opacity:0 then a post-mount snap),
+  // which is what caused the occasional flash. On the first visit they start hidden and
+  // the typewriter (effect below) fades them in.
+  const introInitialOpacity = introState.hasLeftHome ? 1 : 0
   const centerRef = useRef(null)   // hover hit-area (scopes the GSAP selectors)
   const enterTimerRef = useRef(null) // hover-intent timer (fires the swap only after a brief linger)
   const activeRef = useRef(false)    // whether the name⇄bio swap is currently engaged
@@ -356,11 +362,18 @@ export default function MainPage() {
     }
   }
 
-  // First visit — type the name in. GSAP pauses/resumes its own ticker with tab
-  // visibility, so a hidden/refocused tab resumes cleanly. No manual visibility
-  // handling (that's exactly what was skipping the intro + causing the glitches).
+  // First visit — type the name in. On a RETURN from an artifact (introPlayed already
+  // true) we skip the typewriter and just snap every glyph visible, so the homepage reads
+  // as already-there. GSAP pauses/resumes its own ticker with tab visibility, so a
+  // hidden/refocused tab resumes cleanly — no manual visibility handling.
   useEffect(() => {
-    const ctx = gsap.context(() => { typeName(NAME_START_DELAY) }, centerRef)
+    const ctx = gsap.context(() => {
+      if (introState.hasLeftHome) {
+        gsap.set(['.name-letter', '.name-char'], { opacity: 1 })   // returning — already there, no animation
+      } else {
+        typeName(NAME_START_DELAY)                                  // fresh load / refresh — play the intro
+      }
+    }, centerRef)
     return () => { enterTimerRef.current?.kill(); exitTlRef.current?.kill(); ctx.revert() }
   }, [])
 
@@ -486,7 +499,7 @@ export default function MainPage() {
                 ch === ' '
                   ? <span key={i} style={{ display: 'inline-block', width: '0.3em' }} />
                   : <span key={i} className="name-letter"
-                      style={{ display: 'inline-block', opacity: 0, willChange: 'opacity' }}>{ch}</span>
+                      style={{ display: 'inline-block', opacity: introInitialOpacity, willChange: 'opacity' }}>{ch}</span>
               )}
             </p>
             {/* 朱谛 — simple text (Ma Shan Zheng), the two characters stacked and typed
@@ -497,7 +510,7 @@ export default function MainPage() {
             >
               {['朱', '谛'].map((ch, i) => (
                 <span key={i} className="name-char"
-                  style={{ display: 'block', fontSize: '156px', opacity: 0, willChange: 'opacity' }}>{ch}</span>
+                  style={{ display: 'block', fontSize: '156px', opacity: introInitialOpacity, willChange: 'opacity' }}>{ch}</span>
               ))}
             </div>
           </div>

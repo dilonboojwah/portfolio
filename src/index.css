@@ -47,6 +47,10 @@ body {
   --gold-warm:     #c9a84c;
   --aegean:        #3d6191;
   --aegean-deep:   #2a4a75;
+
+  /* ── PAGE-TRANSITION KNOBS ── (see .route-fade below) */
+  --route-fade-dur:  0.9s;                              /* ← softer = bigger; snappier = smaller */
+  --route-fade-ease: cubic-bezier(0.33, 0, 0.2, 1);    /* gentle ease-in-and-out (eases the start too) */
 }
 
 /* ── ARTIFACT CARD HOVER ─────────────────────────────────── */
@@ -56,14 +60,23 @@ body {
 .card-link:hover { transform: scale(1.02); }
 
 /* ── ROUTE FADE ──────────────────────────────────────────── */
-/* The page-transition fade (see AnimatedRoutes in App.jsx). 150ms ease-out,
-   fill-mode `both` so the element holds opacity:1 after it completes. */
+/* The page-transition glide (see AnimatedRoutes in App.jsx). Every page shares the
+   parchment wash, so fading the incoming page in over that constant background reads
+   as a seamless cross-dissolve — no white flash, no "loading" feel; navigation feels
+   like gliding between rooms of one immersive space rather than loading separate pages.
+   PURE OPACITY on purpose: a transform here (even scale(1)) would re-anchor the papyrus
+   `background-attachment: fixed` to this wrapper instead of the viewport. A long, softly
+   eased fade gives the glide without touching the background. fill-mode `both` holds the
+   final state after it completes. */
 @keyframes route-fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 .route-fade {
-  animation: route-fade-in 0.15s ease-out both;
+  /* Knobs live in :root above — change --route-fade-dur for softer/snappier, and
+     --route-fade-ease for the curve. Duration is the main "softness" dial. */
+  animation: route-fade-in var(--route-fade-dur) var(--route-fade-ease) both;
+  will-change: opacity;
 }
 
 /* ── FRAUNCES VARIABLE FONT DEFAULT AXES ─────────────────── */
