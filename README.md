@@ -1,6 +1,6 @@
 # Portfolio: Dustin Zhu
 
-> A collection of artifacts that demonstrates design + technical expertise. The design language lives at the intersection of **Chinese and Greek aesthetics**: a
+> A collection of artifacts that demonstrates design + technical expertise. The design language lives at the intersection of **chinese & greek aesthetics**: a
 > parchment/calligraphic world embellished by accents of aegean blue.
 
 **Live at [dustinzhu.com](https://dustinzhu.com)**
@@ -26,7 +26,7 @@
 
 ## Project Overview
 
-Welcome to my personal portfolio. Currently it's a collection of artifacts: **Artemis** (a career clarity engine), a body of **thought essays**, and a
+Welcome to my personal portfolio. Currently it's a collection of artifacts: **Artemis** (a career clarity engine), two **thought essays**, and a
 **culinary repertoire**. The design language deliberately fuses a chinese calligraphic aura with greek/aegean motifs.
 
 <p align="center">
@@ -34,7 +34,7 @@ Welcome to my personal portfolio. Currently it's a collection of artifacts: **Ar
 </p>
 
 This project showcases:
-- Art direction & design systems (an end-to-end visual identity)
+- Art direction & design systems (end-to-end visual identity)
 - Front-end engineering (hand-built React app)
 - Motion design (GSAP-driven micro-animations)
 - Design-to-code workflow (rough draft → Figma → production code)
@@ -45,25 +45,24 @@ This project showcases:
 
 ### Homepage
 
-The homepage is the thesis of the whole site: **an intersection of Chinese and Greek
+The homepage is the thesis of the entire portfolio: **an intersection of chinese and greek
 aesthetics.** It starts off in a parchment world and threads in aegean blue
 accents as the second cultural voice.
 
-It's also where most of the micro-animation lives (typewriter intro, name ⇄ bio hover swap, ambient life, scale-to-fit composition)
+It's also where most of the micro-animations live (typewriter intro, name ⇄ bio hover swap, ambient life, scale-to-fit composition).
 
 ### Artemis: Career Clarity Engine
 
 **Artemis** is a career clarity engine that helps people figure out what professional work fits them.
 It lives as its own project; there will be a separated dedicated repo for this artifact.
 
-> 🚧 **Coming soon.** The Artemis repository is in progress — this section will link to it
-> once it's public.
+> 🚧 **Coming soon.** The Artemis repository is in progress.
 
 ### Essays
 
-The essays are personally written long-form pieces on the current landscape (and future predictions) of AI.
+The essays are long-form pieces (personal thoughts) on the current and future landscape of AI.
 
-Every essay started out in google docs then moved into figma where the visual structure, design, and diagrams came to life.
+Every piece started out in google docs then moved into figma where the visual structure, design, and diagrams came to life.
 
 <p align="center">
   <img src="docs/images/essays.png" alt="Essay layout" width="560" />
@@ -71,7 +70,7 @@ Every essay started out in google docs then moved into figma where the visual st
 
 ### Culinary Repertoire
 
-I've always enjoyed cooking as a hobby and wanted to share my kitchen creations - my focus has primarily been elevated comfort food.
+I've always enjoyed cooking as a hobby and wanted to share my kitchen creations - my culinary focus has primarily been elevated comfort food.
 
 <p align="center">
   <img src="docs/images/culinary.png" alt="Culinary repertoire" width="560" />
@@ -83,7 +82,7 @@ I've always enjoyed cooking as a hobby and wanted to share my kitchen creations 
 
 I had the same pipeline for every surface on this site:
 
-1. **Draft**: google docs
+1. **Draft in Google Docs**: blank canvas brainstorming
 2. **Design in Figma**: source of truth for everything (1440×900 desktop, 390×844 mobile); colors, type, ornaments are
    all decided here.
 
@@ -100,9 +99,9 @@ I had the same pipeline for every surface on this site:
 | Layer | Choice |
 |---|---|
 | **Framework** | React 18 + Vite |
-| **Styling** | Tailwind CSS v3 |
-| **Routing** | React Router v7 |
-| **Animation** | GSAP (+ ScrollTrigger) |
+| **Styling** | Tailwind CSS |
+| **Routing** | React Router |
+| **Animation** | GSAP |
 | **Art** | Hand-authored SVG |
 | **Hosting** | Vercel |
 
