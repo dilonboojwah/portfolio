@@ -11,7 +11,7 @@
 
 ---
 
-### Table of Contents
+## Table of Contents
 1. [Project Overview](#project-overview)
 2. [Portfolio Experience](#portfolio-experience)
    - [Homepage](#homepage)
@@ -24,7 +24,7 @@
 
 ---
 
-### Project Overview
+## Project Overview
 
 Welcome to my personal portfolio. Currently it's a collection of artifacts: **Artemis** (a career clarity engine), a body of **thought essays**, and a
 **culinary repertoire**. The design language deliberately fuses a chinese calligraphic aura with greek/aegean motifs.
@@ -41,9 +41,9 @@ This project showcases:
 
 ---
 
-### Portfolio Experience
+## Portfolio Experience
 
-#### Homepage
+### Homepage
 
 The homepage is the thesis of the whole site: **an intersection of Chinese and Greek
 aesthetics.** It starts off in a parchment world and threads in aegean blue
@@ -51,7 +51,7 @@ accents as the second cultural voice.
 
 It's also where most of the micro-animation lives (typewriter intro, name ⇄ bio hover swap, ambient life, scale-to-fit composition)
 
-#### Artemis: Career Clarity Engine
+### Artemis: Career Clarity Engine
 
 **Artemis** is a career clarity engine that helps people figure out what professional work fits them.
 It lives as its own project; there will be a separated dedicated repo for this artifact.
@@ -59,7 +59,7 @@ It lives as its own project; there will be a separated dedicated repo for this a
 > 🚧 **Coming soon.** The Artemis repository is in progress — this section will link to it
 > once it's public.
 
-#### Essays
+### Essays
 
 The essays are personally written long-form pieces on the current landscape (and future predictions) of AI.
 
@@ -69,7 +69,7 @@ Every essay started out in google docs then moved into figma where the visual st
   <img src="docs/images/essays.png" alt="Essay layout" width="560" />
 </p>
 
-#### Culinary Repertoire
+### Culinary Repertoire
 
 I've always enjoyed cooking as a hobby and wanted to share my kitchen creations - my focus has primarily been elevated comfort food.
 
@@ -79,7 +79,7 @@ I've always enjoyed cooking as a hobby and wanted to share my kitchen creations 
 
 ---
 
-### Design & Development Process
+## Design & Development Process
 
 I had the same pipeline for every surface on this site:
 
@@ -95,7 +95,7 @@ I had the same pipeline for every surface on this site:
 
 ---
 
-### Tech Stack
+## Tech Stack
 
 | Layer | Choice |
 |---|---|
@@ -108,7 +108,7 @@ I had the same pipeline for every surface on this site:
 
 ---
 
-### Project Structure
+## Project Structure
 
 ```
 portfolio/
