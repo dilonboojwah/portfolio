@@ -3,6 +3,9 @@ import { useEffect, useState } from 'react'
 import MainPage from './pages/MainPage'
 import MobilePage from './pages/MobilePage'
 import { introState } from './lib/introState'
+// Vercel Web Analytics. The /react entry (NOT /next — this is a Vite+React SPA) auto-
+// tracks client-side route changes, so each artifact page is counted on navigation.
+import { Analytics } from '@vercel/analytics/react'
 
 // EAGER imports for every page. The site is small, so we ship all page code in one
 // bundle instead of code-splitting. Navigation then never waits on a chunk fetch —
@@ -106,6 +109,7 @@ export default function App() {
             the real site (and can still preview the placeholder at /mobile). */}
         {isMobile ? <MobilePage /> : <AnimatedRoutes />}
       </div>
+      <Analytics />
     </BrowserRouter>
   )
 }
