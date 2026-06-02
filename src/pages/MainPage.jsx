@@ -36,7 +36,7 @@ const NAME_BLUR    = 6     // px the name blurs by as it dissolves (and clears o
 //     leave (i.e. mid wave-out / mid name-return). Raise THIS to kill the "rapid shuffle
 //     back-and-forth" abuse: quick re-entries during that window get ignored entirely.
 const HOVER_INTENT_DELAY   = 0.15
-const REENTER_INTENT_DELAY = 0.25
+const REENTER_INTENT_DELAY = 0.2
 
 // ▸ 3. RETURN FADE — plays when the cursor LEAVES the center. This is NOT the
 //      typewriter: the whole name fades in together while drifting forward
