@@ -312,7 +312,7 @@ export default function EssayCoordination() {
               bullets: [
                 'Follow escalation paths: detect → route → resolve → improve',
                 'Define escalation triggers (low confidence, missing context, policy-sensitive case)',
-                'Route by tier: 0: model retries, 1: frontline human reviewer, 2: domain owner, 3: function head',
+                'Route by tier (0: model retries, 1: frontline human reviewer, 2: domain owner, 3: function head)',
                 'Require every escalation end with resolution, root-cause tag, system fix',
               ],
             },

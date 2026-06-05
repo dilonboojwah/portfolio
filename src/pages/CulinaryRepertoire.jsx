@@ -551,7 +551,7 @@ export default function CulinaryRepertoire() {
               </a>
               {/* Bakery */}
               <a
-                href="https://ladywong.com/?srsltid=AfmBOor6UwLbH-l_9kYibZP5KELZRlBIUDI7rHPIRavVq3Ul8-0nqtFe"
+                href="https://ladywong.com/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-ink"
