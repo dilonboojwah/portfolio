@@ -313,7 +313,7 @@ export default function EssayEvolution() {
   const body16   = { ...fv, fontSize: '16px', lineHeight: '1.75', letterSpacing: '0.17px' }
 
   return (
-    <EssayLayout title="The Evolution of Intelligence" backWord="home">
+    <EssayLayout title="The Evolution of Intelligence" date="May 26, 2026" backWord="home">
 
         {/* Lead paragraph */}
         <p className="font-fraunces text-ink shrink-0 mt-12" style={{ ...body16, ...prose680 }}>

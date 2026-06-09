@@ -21,7 +21,7 @@ const COPYRIGHT_DROP = 160
 // link, the four corner ornaments, and the centered 900px column with the title /
 // author / date header and the copyright footer. Each essay supplies only its own
 // `title`, `date`, the back-link `backWord`, and its body as `children`.
-export default function EssayLayout({ title, date = 'June 11, 2026', backWord = 'home', children }) {
+export default function EssayLayout({ title, date = '', backWord = 'home', children }) {
   return (
     <div
       className="relative w-full"

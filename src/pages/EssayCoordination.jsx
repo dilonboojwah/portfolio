@@ -144,7 +144,7 @@ export default function EssayCoordination() {
   }
 
   return (
-    <EssayLayout title="Solving Human-AI Coordination" backWord="home">
+    <EssayLayout title="Solving Human-AI Coordination" date="June 2, 2026" backWord="home">
 
         {/* Intro 1 */}
         <p className="font-fraunces text-ink shrink-0 mt-12" style={{ ...body16, ...prose680 }}>
