@@ -429,13 +429,13 @@ export default function MainPage() {
            cap only limits the RIGHT side (the middle-container edge). */}
       <FallingPetals
         scale={scale} zIndex={2}
-        count={12}
-        fall={{ min: 18, max: 32 }}
+        count={18}
+        fall={{ min: 14, max: 24 }}
         fadeIn={0.01}
         spawnPoints={TREE_SPAWN_POINTS}
         spawn={{ hAnchor: 'left', vAnchor: 'top' }}
-        drift={{ min: -350, max: 560 }}
-        cap={{ artboardX: 574, side: 'max' }}
+        drift={{ min: -350, max: 700 }}
+        cap={{ artboardX: 630, side: 'max' }}
         petalWeights={TREE_WEIGHTS}
         sway={{ min: 8, max: 18 }}
       />
@@ -447,7 +447,7 @@ export default function MainPage() {
       <FallingPetals
         scale={scale} zIndex={2}
         count={8}
-        fall={{ min: 13, max: 23 }}
+        fall={{ min: 10, max: 18 }}
         fadeIn={0.01}
         spawnPoints={FLOWER_SPAWN_POINTS}
         spawn={{ hAnchor: 'right', vAnchor: 'bottom' }}
