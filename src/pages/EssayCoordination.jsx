@@ -172,9 +172,9 @@ export default function EssayCoordination() {
 
         {/* I. Workflow design */}
         <div className="shrink-0 mt-10" style={prose680}>
-          <p className="font-fraunces mb-8" style={frameworkLbl}>I. Workflow design</p>
+          <p className="font-fraunces mb-6" style={frameworkLbl}>I. Workflow design</p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
-            <ul className="list-disc ml-14 font-fraunces" style={body15}>
+            <ul className="list-disc ml-20 font-fraunces" style={body15}>
               <li>
                 They don't understand/map their workflows at the level required for automation (in most cases it's not visually documented)
               </li>
@@ -187,16 +187,16 @@ export default function EssayCoordination() {
 
         {/* II. Context quality */}
         <div className="shrink-0 mt-10" style={prose680}>
-          <p className="font-fraunces mb-8" style={frameworkLbl}>II. Context quality</p>
+          <p className="font-fraunces mb-6" style={frameworkLbl}>II. Context quality</p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
-            <ul className="list-disc ml-14 font-fraunces" style={body15}>
+            <ul className="list-disc ml-20 font-fraunces" style={body15}>
               <li>Most firms have weak context architecture. The knowledge lives in Slack, scattered docs, tribal memory, outdated SOPs</li>
             </ul>
             <ul className="list-disc ml-14 font-fraunces" style={body15}>
               <li>Without structured context, models don't have a foundational base to learn from and produce relevant responses</li>
             </ul>
           </div>
-          <p className="font-fraunces text-center mt-5"
+          <p className="font-fraunces text-center mt-4"
             style={{ ...fv, fontSize: '15px', color: '#9a8e7f' }}>
             garbage in... garbage out...
           </p>
@@ -204,9 +204,9 @@ export default function EssayCoordination() {
 
         {/* III. Evaluation */}
         <div className="shrink-0 mt-10" style={prose680}>
-          <p className="font-fraunces mb-8" style={frameworkLbl}>III. Evaluation</p>
+          <p className="font-fraunces mb-6" style={frameworkLbl}>III. Evaluation</p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
-            <ul className="list-disc ml-14 font-fraunces" style={body15}>
+            <ul className="list-disc ml-20 font-fraunces" style={body15}>
               <li>Most firms don't have explicit definitions of "good"; they rely on senior people "just knowing" if something feels right</li>
             </ul>
             <ul className="list-disc ml-14 font-fraunces" style={body15}>
