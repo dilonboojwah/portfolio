@@ -22,6 +22,11 @@ const LETTER_DUR       = 0.3    // how long EACH English letter takes to fade in
 const ZHU_IN           = 0.25  // entrance time of 朱 — seconds after the name sequence starts
 const DI_IN            = 0.4    // entrance time of 谛 — seconds after the name sequence starts
 const CHAR_DUR         = 0.6    // how long EACH Chinese character takes to fade (also reused on type-out)
+// Total run time of the intro AFTER it starts (derived from the knobs above) — the later
+// of the last English letter finishing and the last Chinese character finishing. Used to
+// gate the hover swap so a cursor sitting in the center on load can't trigger the bio
+// mid-typewriter (the two clashing).
+const INTRO_TOTAL = Math.max(NAME_TYPE_TIME + LETTER_DUR, DI_IN + CHAR_DUR)
 
 // ▸ 2. HOVER DISSOLVE — plays when the cursor ENTERS the center (name leaves so the
 //      bio arrives). UNIFORM: the whole name fades + blurs out together (no per-letter
@@ -226,6 +231,7 @@ export default function MainPage() {
   const exitTlRef = useRef(null)     // the exit timeline: (optional hold →) wave-out → name return
   const pendingOutRef = useRef(false) // left mid-wave-in → owe a recovery once the wave-in finishes
   const bioFullyInRef = useRef(false) // whether the wave-in has fully completed (full bio on screen)
+  const hoverReadyRef = useRef(false) // gate: the name⇄bio hover swap is blocked until the intro finishes
 
   // ── Name typewriter (intro only) ─────────────────────────────────────────────
   // Plays on page load / refresh / return-from-route. Both groups fire together:
@@ -337,6 +343,9 @@ export default function MainPage() {
     aboutWaveIn()     // bio waves in
   }
   const handleEnter = () => {
+    // Blocked until the intro typewriter has finished — otherwise a cursor already sitting
+    // in the center on page load fires the bio swap mid-intro and the two clash.
+    if (!hoverReadyRef.current) return
     // Don't react immediately — wait out the intent delay. A quick glaze leaves before
     // this fires, so nothing animates. RE-entering while the name is still unsettled from
     // a recent leave uses the longer REENTER gate, so rapid back-and-forth shuffling is
@@ -370,8 +379,12 @@ export default function MainPage() {
     const ctx = gsap.context(() => {
       if (introState.hasLeftHome) {
         gsap.set(['.name-letter', '.name-char'], { opacity: 1 })   // returning — already there, no animation
+        hoverReadyRef.current = true                               // hover works immediately (no intro to clash with)
       } else {
         typeName(NAME_START_DELAY)                                  // fresh load / refresh — play the intro
+        // Only open the hover swap once the intro has fully played, so a cursor resting in
+        // the center at load can't summon the bio on top of the still-typing name.
+        gsap.delayedCall(NAME_START_DELAY + INTRO_TOTAL, () => { hoverReadyRef.current = true })
       }
     }, centerRef)
     return () => { enterTimerRef.current?.kill(); exitTlRef.current?.kill(); ctx.revert() }
