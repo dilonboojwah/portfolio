@@ -25,7 +25,7 @@ export default function ComingSoon() {
         <p className="font-fraunces text-dust" style={{
           ...fv, fontSize: '28px', lineHeight: 1, letterSpacing: '0.98px', textAlign: 'center', margin: 0,
         }}>
-          coming soon
+          actively building...
         </p>
 
         <Link
