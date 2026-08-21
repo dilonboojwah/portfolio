@@ -150,8 +150,8 @@ function EvolutionTable() {
         <tr>
           <th style={{ ...hdr, ...bb(true,  true,  X.h),  width: '88px'  }} />
           <th style={{ ...hdr, ...bb(true,  true,  X.h),  width: '200px' }}>BOTTLENECK</th>
-          <th style={{ ...hdr, ...bb(true,  true,  X.h),  width: '280px' }}>ARDEN'S EXECUTION</th>
-          <th style={{ ...hdr, ...bb(false, true,  X.h)                  }}>EXAMPLE SITUATION</th>
+          <th style={{ ...hdr, ...bb(true,  true,  X.h),  width: '280px' }}>HOW ARDEN EXECUTES</th>
+          <th style={{ ...hdr, ...bb(false, true,  X.h)                  }}>AN EXAMPLE CASE</th>
         </tr>
       </thead>
       <tbody>
@@ -161,22 +161,22 @@ function EvolutionTable() {
           <td style={{ ...pad, ...yr,   ...bb(true,  true,  X.r85) }}>1985</td>
           <td style={{ ...pad, ...body, ...bb(true,  true,  X.r85) }}>Making computers useful inside institutions</td>
           <td style={{ ...pad, ...body, ...bb(true,  true,  X.r85) }}>
-            Arden sits with finance/ops/marketing to understand a manual process then
+            Arden sits with finance/ops/marketing to understand a manual process, then
             translates it into basic computer logic.
           </td>
           <td style={{ ...pad, ...body, ...bb(false, true,  X.r85) }}>
             <p className="mb-0">Hospitals track records through paper, filing cabinets, and phone calls.</p>
-            <p className="mt-3 mb-0">Arden creates a system: inputs, fields, dependencies, exceptions, outputs. She converts everything to logic.</p>
+            <p className="mt-3 mb-0">Arden creates a system: inputs, fields, dependencies, outputs. She converts everything to logic.</p>
           </td>
         </tr>
 
         {/* 1998 */}
         <tr>
           <td style={{ ...pad, ...yr,   ...bb(true,  true,  X.r98) }}>1998</td>
-          <td style={{ ...pad, ...body, ...bb(true,  true,  X.r98) }}>Leveraging the full potential of networks</td>
+          <td style={{ ...pad, ...body, ...bb(true,  true,  X.r98) }}>Leveraging the potential of networks</td>
           <td style={{ ...pad, ...body, ...bb(true,  true,  X.r98) }}>
             Arden sees the internet not just as a place to browse pages but also as a
-            distribution layer, commerce layer, and coordination layer.
+            distribution layer + commerce layer + coordination layer.
           </td>
           <td style={{ ...pad, ...body, ...bb(false, true,  X.r98) }}>
             <p className="mb-0">Retailers treat websites like a digital brochure.</p>
@@ -189,14 +189,14 @@ function EvolutionTable() {
           <td style={{ ...pad, ...yr,   ...bb(true,  true,  X.r12) }}>2012</td>
           <td style={{ ...pad, ...body, ...bb(true,  true,  X.r12) }}>
             <span style={{ color: '#1c1814' }}>Scaling software into systems people use every day </span>
-            <span style={{ color: '#5c5347' }}>(internet is now mainstream)</span>
+            <span style={{ color: '#5c5347' }}>(now internet is mainstream)</span>
           </td>
           <td style={{ ...pad, ...body, ...bb(true,  true,  X.r12) }}>
             Arden doesn't just ship features; she designs the whole product system around
             retention, data, and scale.
           </td>
           <td style={{ ...pad, ...body, ...bb(false, true,  X.r12) }}>
-            <p className="mb-0">A company wants a better app.</p>
+            <p className="mb-0">A company wants a 'better app'.</p>
             <p className="mt-3 mb-0">Arden thinks about onboarding, APIs, experiments, and retention loops.</p>
           </td>
         </tr>
@@ -207,7 +207,7 @@ function EvolutionTable() {
           <td style={{ ...pad, ...body, ...bb(true,  true,  X.r26) }}>Making AI reliable inside workflows</td>
           <td style={{ ...pad, ...body, ...bb(true,  true,  X.r26) }}>
             Arden takes a messy workflow, inserts AI into the right steps, and decides
-            where humans still need to step in.
+            where humans still need to be in the loop.
           </td>
           <td style={{ ...pad, ...body, ...bb(false, true,  X.r26) }}>
             <p className="mb-0">A manager says "can we use AI for this?"</p>
@@ -225,18 +225,18 @@ function EvolutionTable() {
         <tr>
           <td style={{ ...pad, ...yr,   ...bb(true,  false) }}>2035</td>
           <td style={{ ...pad, ...body, ...bb(true,  false) }}>
-            <span style={{ color: '#1c1814' }}>Allocating AI across an entire institution </span>
-            <span style={{ color: '#9a8e7f' }}>(AI is now mainstream, just like how the internet feels in 2026)</span>
+            Leveraging institutional literacy after functional execution has been commoditized
           </td>
           <td style={{ ...pad, ...body, ...bb(true,  false) }}>
-            Arden allocates intelligence across the business the way an investor allocates money.
+            <p className="mb-0">Arden allocates machine intelligence and humans optimally.</p>
+            <p className="mt-3 mb-0">She understands companies as economic organisms (incentives, capital flows, regulatory constraints, customer trust).</p>
           </td>
           <td style={{ ...pad, ...body, ...bb(false, false) }}>
             <p className="mb-0">A hospital runs 150 agents across intake, billing, coding, and patient comms.</p>
             <p className="mt-3 mb-1">Arden asks:</p>
             <ul className="list-disc ml-5 space-y-0.5">
-              <li>what should happen automatically</li>
-              <li>what needs approval</li>
+              <li>where does intelligence create advantage</li>
+              <li>which decisions create legal/reputational exposure</li>
               <li>where is human judgment still too important to outsource</li>
             </ul>
           </td>
@@ -313,18 +313,18 @@ export default function EssayEvolution() {
   const body16   = { ...fv, fontSize: '16px', lineHeight: '1.75', letterSpacing: '0.17px' }
 
   return (
-    <EssayLayout title="The Evolution of Intelligence" date="May 26, 2026" backWord="home">
+    <EssayLayout title="The Evolution of Intelligence" date="June 2, 2026" backWord="home">
 
         {/* Lead paragraph */}
         <p className="font-fraunces text-ink shrink-0 mt-12" style={{ ...body16, ...prose680 }}>
-          History's top performers weren't always the smartest people in the room.
-          They were just early - early to see bottlenecks, early to position themselves where tech was rewriting rules, early to compound success.
-          This has especially been true since 1970.
+          The top performers in history weren't always the smartest people in the room.
+          They were just early to see bottlenecks and position themselves ahead of where tech rules
+          were being rewritten. This has especially been true since 1970.
         </p>
 
         {/* Bottlenecks label */}
         <p className="font-fraunces text-ink shrink-0 mt-8" style={{ ...body16, ...prose680 }}>
-          Tech/operational bottlenecks by time periods:
+          Bottlenecks by time periods:
         </p>
 
         {/* Zigzag timeline */}
@@ -334,13 +334,13 @@ export default function EssayEvolution() {
 
         {/* Pattern paragraph */}
         <p className="font-fraunces text-ink shrink-0 mt-6" style={{ ...body16, ...prose680 }}>
-          The common pattern has been: <br />
+          Common pattern: <br />
           {[
-            'new technology appears',
+            'new tech appears',
             'early users get attention',
-            'usage becomes common',
+            'usage spreads',
             "prestige moves up a 'layer'",
-            'new elite performer designs/scales on top of the tool',
+            'new elite performers scale on top of the tool',
           ].flatMap((phrase, i, arr) => {
             const els = [<span key={`p${i}`} style={{ color: '#3d6191' }}>{phrase}</span>]
             if (i < arr.length - 1) els.push(<span key={`a${i}`} style={{ color: '#c9a84c' }}> → </span>)
@@ -356,7 +356,7 @@ export default function EssayEvolution() {
 
         {/* Table intro */}
         <p className="font-fraunces text-ink shrink-0 mt-4" style={{ ...body16, ...prose680 }}>
-          Below is a deeper dive into what each era looks like:
+          Below is a dive deeper into what each era looks like.
         </p>
 
         {/* Arden + caption — wave-in caption + ink/return-fade figure on scroll-in */}
@@ -377,17 +377,16 @@ export default function EssayEvolution() {
         <div className="font-fraunces text-ink shrink-0 mt-4" style={{ ...body16, ...prose680 }}>
           <p className="mb-1">Every innovation wave changes what society admires:</p>
           <ul className="list-disc ml-6 mb-6">
-            <li>The early computer era rewarded people who could operate the machine</li>
-            <li>The internet era rewarded people who could build on the network</li>
-            <li>The software era rewarded people who could scale platforms</li>
-            <li>The AI era rewards people who can direct intelligence</li>
+            <li>The early computer era rewarded the person who could operate the machine</li>
+            <li>The internet era rewarded the person who could build on the network</li>
+            <li>The software era rewarded the person who could scale platforms</li>
+            <li>The AI era rewards the person who can direct intelligence.</li>
           </ul>
           <p className="mb-0">2026 is about "how do we deploy AI into work".</p>
           <p className="mb-6">2035 will be about "how do we redesign orgs now that intelligence is ambient".</p>
           <p className="mb-0">
             Staying intellectually modern means not attaching yourself to the current tool, but to the
-            new bottleneck it creates. The real edge moves upward to the people who can organize, direct,
-            and scale what sits on top of them. What matters is not being early to the tool, but early
+            bottleneck it creates. What matters is not being early to the tool, but early
             to the scarcity it creates.
           </p>
         </div>

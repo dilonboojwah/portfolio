@@ -144,7 +144,7 @@ export default function EssayCoordination() {
   }
 
   return (
-    <EssayLayout title="Solving Human-AI Coordination" date="June 2, 2026" backWord="home">
+    <EssayLayout title="Solving Human-AI Coordination" date="July 17, 2026" backWord="home">
 
         {/* Intro 1 */}
         <p className="font-fraunces text-ink shrink-0 mt-12" style={{ ...body16, ...prose680 }}>
@@ -167,7 +167,7 @@ export default function EssayCoordination() {
         </h2>
 
         <p className="font-fraunces text-ink shrink-0 mt-4" style={{ ...body16, ...prose680 }}>
-          With AI widespread now, an org is susceptible to 3 points of failure.
+          With AI widespread now, an org is most susceptible to 3 points of failure.
         </p>
 
         {/* I. Workflow design */}
@@ -176,11 +176,11 @@ export default function EssayCoordination() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
             <ul className="list-disc ml-20 font-fraunces" style={body15}>
               <li>
-                They don't understand/map their workflows at the level required for automation (in most cases it's not visually documented)
+                They don't understand/map their workflows at the level required for automation
               </li>
             </ul>
             <ul className="list-disc ml-14 font-fraunces" style={body15}>
-              <li>Executives can name departments/job titles but not decision points, failure states, exception handling, handoff logic</li>
+              <li>Executives can name departments+job titles but not decision points, failure states, handoff logic</li>
             </ul>
           </div>
         </div>
@@ -193,7 +193,7 @@ export default function EssayCoordination() {
               <li>Most firms have weak context architecture. The knowledge lives in Slack, scattered docs, tribal memory, outdated SOPs</li>
             </ul>
             <ul className="list-disc ml-14 font-fraunces" style={body15}>
-              <li>Without structured context, models don't have a foundational base to learn from and produce relevant responses</li>
+              <li>Without structured context, models don't have a foundational base to learn from to produce relevant responses</li>
             </ul>
           </div>
           <p className="font-fraunces text-center mt-4"
@@ -207,7 +207,7 @@ export default function EssayCoordination() {
           <p className="font-fraunces mb-6" style={frameworkLbl}>III. Evaluation</p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
             <ul className="list-disc ml-20 font-fraunces" style={body15}>
-              <li>Most firms don't have explicit definitions of "good"; they rely on senior people "just knowing" if something feels right</li>
+              <li>Most firms don't have explicit definitions of "good", they rely on senior people 'just knowing' if something feels right</li>
             </ul>
             <ul className="list-disc ml-14 font-fraunces" style={body15}>
               <li>This leads to non-standardized and inconsistent output, with or without AI</li>
@@ -240,7 +240,7 @@ export default function EssayCoordination() {
             {
               title: 'Orchestrate',
               bullets: [
-                'Write orchestration logic using code to turn the map into a backend workflow graph/state machine',
+                'Use code to write orchestration logic; turn the map into a backend workflow graph/state machine',
                 'Possible tool: LangGraph + Python backend',
               ],
             },
@@ -256,31 +256,31 @@ export default function EssayCoordination() {
         {/* II. Context quality */}
         <div className="shrink-0 mt-10 flex flex-col items-center" style={prose680}>
           <p className="font-fraunces mb-2" style={frameworkLbl}>II. Context quality</p>
-          <p className="mb-6" style={subtitleLbl}>Create content systems</p>
+          <p className="mb-6" style={subtitleLbl}>Create context systems</p>
           <PillSequence pills={['harvest', 'normalize', 'approve', 'publish']} />
           <AccordionGroup items={[
             {
               title: 'Harvest',
               bullets: [
-                'Pull content from source systems: docs, Slack, Notion, CRM, tickets, SME interviews',
+                'Pull context from source systems: docs, Slack, Notion, CRM, tickets, SME interviews',
               ],
             },
             {
               title: 'Normalize',
               bullets: [
-                'Use canonical format: policies, entities, process rules, examples/precedents, definitions',
+                'Use canonical format: process rules, definitions',
               ],
             },
             {
               title: 'Approve',
               bullets: [
-                'Assign an owner for each content domain',
+                'Assign an owner for each context domain',
               ],
             },
             {
               title: 'Publish',
               bullets: [
-                'Publish content using a document store like Amazon S3 for raw docs + DB like Postgres for structured truth + retrieval layer like pgvector',
+                'Publish context using a document store like Amazon S3 for raw docs + DB like Postgres for structured truth + retrieval layer like pgvector',
               ],
             },
           ]} />
@@ -304,7 +304,6 @@ export default function EssayCoordination() {
               bullets: [
                 'Run offline evals before release',
                 'Run online monitoring after release (success rate, handoff rate, error categories, cost/latency)',
-                'Can use LangSmith',
               ],
             },
             {
@@ -332,13 +331,13 @@ export default function EssayCoordination() {
             Human-AI coordination fails when firms cannot make work legible. A company needs clear
             task boundaries, explicit context, measurable outcomes, and named ownership.
           </p>
-          <p className="mb-1">Without clarity on those things, orgs will either:</p>
+          <p className="mb-1">Without clarity on these things, orgs will either:</p>
           <ul className="list-disc ml-6 mb-5">
             <li>Over-automate and create chaos</li>
             <li>Under-automate and create stagnation</li>
           </ul>
           <p className="mb-0">
-            Now, it's less so about access to intelligence and more about how to orchestrate around it.
+            It's less so about access to intelligence and more about how to orchestrate around it.
           </p>
         </div>
 
